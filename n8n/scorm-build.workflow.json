@@ -1,0 +1,62 @@
+{
+  "name": "Build validated SCORM 1.2 ZIP",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v = $json;\nfor (const key of ['coursePath','outputPath','generatorPath']) {\n  if (typeof v[key] !== 'string' || !/^[A-Za-z]:\\\\[^\\r\\n\\\"'`;&|<>]+$/.test(v[key])) throw new Error(`Unsafe or missing ${key}`);\n}\nif (!v.outputPath.toLowerCase().endsWith('.zip')) throw new Error('outputPath must end in .zip');\nreturn [{json:v}];"
+      },
+      "id": "validate-paths",
+      "name": "Validate Paths",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "command": "node \"{{$json.generatorPath}}\\dist\\src\\cli.js\" build --course \"{{$json.coursePath}}\" --out \"{{$json.outputPath}}\""
+      },
+      "id": "build",
+      "name": "Build SCORM",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const report = JSON.parse($json.stdout);\nif (!report.ok) throw new Error(report.errors?.map(e => `${e.path}: ${e.message}`).join('; ') || 'SCORM build failed');\nreturn [{json:report}];"
+      },
+      "id": "parse-report",
+      "name": "Parse Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 0]
+    },
+    {
+      "parameters": {
+        "filePath": "={{$json.output}}"
+      },
+      "id": "read-zip",
+      "name": "Read ZIP",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [960, 0]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": { "main": [[{ "node": "Validate Paths", "type": "main", "index": 0 }]] },
+    "Validate Paths": { "main": [[{ "node": "Build SCORM", "type": "main", "index": 0 }]] },
+    "Build SCORM": { "main": [[{ "node": "Parse Report", "type": "main", "index": 0 }]] },
+    "Parse Report": { "main": [[{ "node": "Read ZIP", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "a8fe0ef5-5d46-40c7-b78c-32eb352463bb"
+}

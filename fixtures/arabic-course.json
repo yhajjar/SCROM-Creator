@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0",
+  "id": "7b9ca92b-72f8-4483-bc3e-a644587e5cd0",
+  "title": "أساسيات السلامة الرقمية",
+  "description": "نموذج عربي لاختبار اتجاه النص من اليمين إلى اليسار.",
+  "language": "ar",
+  "direction": "rtl",
+  "passingScore": 80,
+  "intro": "أجب عن السؤال ثم اعرض النتيجة.",
+  "results": {
+    "passed": "أحسنت، لقد اجتزت الاختبار.",
+    "failed": "راجع المحتوى وحاول مرة أخرى من خلال منصة التعلم."
+  },
+  "theme": {
+    "primary": "#2457A6",
+    "secondary": "#173867",
+    "background": "#EEF3F9",
+    "surface": "#FFFFFF",
+    "text": "#172033",
+    "fontFamily": "Tahoma, Arial, sans-serif"
+  },
+  "questions": [
+    {
+      "id": "strong-password",
+      "type": "multipleChoice",
+      "prompt": "أي كلمة مرور هي الأكثر أماناً؟",
+      "choices": [
+        { "id": "simple", "text": "123456", "correct": false },
+        { "id": "name", "text": "اسم المستخدم", "correct": false },
+        { "id": "strong", "text": "عبارة طويلة وفريدة", "correct": true }
+      ],
+      "correctFeedback": "صحيح. العبارة الطويلة والفريدة أكثر أماناً.",
+      "incorrectFeedback": "اختر عبارة طويلة وفريدة ولا تُعد استخدامها."
+    }
+  ]
+}
