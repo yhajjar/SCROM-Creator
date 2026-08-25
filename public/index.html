@@ -1,0 +1,2668 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assessment Creator - Visual Authoring & JSON Export</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cairo:wght@400;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .rtl-text { font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif; direction: rtl; }
+    .tab-active { @apply border-indigo-600 text-indigo-600 bg-indigo-50/50 font-semibold; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 bg-slate-50">
+
+  <!-- Header Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Assessment Creator</h1>
+            <p class="text-xs text-slate-500">Visual Authoring, Interactive Preview & Native JSON Schema</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button id="btn-download-json-header" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer">
+            <i class="fa-solid fa-download"></i>
+            <span>Download .json</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-6 border-t border-slate-100 text-sm font-medium">
+        <button data-tab="builder" class="tab-btn py-3 px-1 border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50/50 font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square"></i> Assessment Builder & Live Preview
+        </button>
+        <button data-tab="code" class="tab-btn py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2">
+          <i class="fa-solid fa-code"></i> JSON Inspector & Export
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- TAB 1: ASSESSMENT BUILDER & LIVE PREVIEW -->
+    <div id="tab-builder" class="tab-content space-y-6">
+
+      <!-- Assessment Controls & Selector Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <label for="select-course" class="text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Assessment:</label>
+          <select id="select-course" class="w-full md:w-72 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </select>
+          <button id="btn-delete-course" title="Delete custom assessment" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors flex-shrink-0 cursor-pointer">
+            <i class="fa-solid fa-trash-can"></i> Delete
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btn-new-course" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+            <i class="fa-solid fa-plus"></i> New Assessment
+          </button>
+          <button id="btn-save-course" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+          </button>
+          <button id="btn-download-json" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer">
+            <i class="fa-solid fa-download"></i> Download Assessment JSON
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Layout: Editor on Left, Interactive Preview on Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left Column: Assessment Metadata & Question Editors -->
+        <div class="lg:col-span-7 space-y-6">
+
+          <!-- General Metadata & Settings Accordion / Card -->
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-500"></i> Assessment Settings & Visual Theme
+              </h3>
+              <span id="badge-total-points" class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">Total Points: 0</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="md:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Assessment Title</label>
+                <input type="text" id="edit-course-title" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500">
+              </div>
+
+              <div>
+                <label for="edit-direction" class="block font-semibold text-slate-700 mb-1">Text Direction</label>
+                <select id="edit-direction" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                  <option value="rtl">RTL (العربية / Right-to-Left)</option>
+                  <option value="ltr">LTR (Left-to-Right)</option>
+                  <option value="auto">Auto</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label for="edit-passing-score" class="block font-semibold text-slate-700 mb-1">Passing Score (%)</label>
+                  <input type="number" id="edit-passing-score" min="0" max="100" placeholder="80" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                  <label for="edit-attempts" class="block font-semibold text-slate-700 mb-1">Attempts</label>
+                  <input type="number" id="edit-attempts" min="1" max="10" placeholder="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Introduction Body (Shown on LMS start)</label>
+                <textarea id="edit-intro-body" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+              </div>
+
+              <!-- Assessment-Level Global Toggles -->
+              <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                  <div class="pr-2">
+                    <label for="edit-shuffle-questions" class="font-semibold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-shuffle text-indigo-500"></i> Global Shuffle (Questions & Answers)
+                    </label>
+                    <span class="text-[10px] text-slate-500 block">Randomize questions order and all choices/answers</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" id="edit-shuffle-questions" class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                  <div class="pr-2">
+                    <label for="edit-show-feedback" class="font-semibold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-comments text-indigo-500"></i> Enable Assessment Feedback
+                    </label>
+                    <span class="text-[10px] text-slate-500 block">Default evaluation feedback on answers</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" id="edit-show-feedback" class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Results Page Configuration Section -->
+              <div class="md:col-span-2 border-t border-slate-200 pt-3.5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold shadow-2xs">
+                      <i class="fa-solid fa-square-poll-vertical"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Results Page Configuration (results_page)</h4>
+                      <p class="text-[11px] text-slate-500">Controls outcome screens, score cards, evaluation messages, and review actions.</p>
+                    </div>
+                  </div>
+                  <button type="button" onclick="jumpToPreviewResults()" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <i class="fa-solid fa-flag-checkered text-amber-500"></i> Preview Results Screen
+                  </button>
+                </div>
+
+                <!-- Primary Results Page Feature Switches -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="pr-2">
+                      <label for="edit-results-show" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-display text-indigo-500"></i> Show Results Page
+                      </label>
+                      <span class="text-[10px] text-slate-500 block">Display completion/grade screen at quiz end</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" id="edit-results-show" checked class="sr-only peer">
+                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="pr-2">
+                      <label for="edit-results-show-grade" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Show Grade & Score
+                      </label>
+                      <span class="text-[10px] text-slate-500 block">Display score points, percentage and passing status</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" id="edit-results-show-grade" class="sr-only peer">
+                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="pr-2">
+                      <label for="edit-results-show-icon" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-award text-indigo-500"></i> Show Result Icon
+                      </label>
+                      <span class="text-[10px] text-slate-500 block">Display status emblem (trophy / star / alert)</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" id="edit-results-show-icon" class="sr-only peer">
+                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="pr-2">
+                      <label for="edit-results-show-review" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-rotate-left text-indigo-500"></i> Show Review Button
+                      </label>
+                      <span class="text-[10px] text-slate-500 block">Allow learner to inspect questions & answers</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" id="edit-results-show-review" checked class="sr-only peer">
+                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Message Mode Selector & Variables Helper -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label for="edit-results-mode" class="block font-bold text-slate-700 text-xs mb-1">
+                        <i class="fa-solid fa-sliders text-indigo-500"></i> Message Mode (message_mode)
+                      </label>
+                      <select id="edit-results-mode" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 font-medium">
+                        <option value="completion">completion — Single completion message</option>
+                        <option value="pass_fail">pass_fail — Adaptive success / failure messages</option>
+                        <option value="score_based">score_based — Dynamic score & points interpolation</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <span class="block font-bold text-slate-700 text-xs mb-1">
+                        <i class="fa-solid fa-code text-indigo-500"></i> Insert Template Variables:
+                      </span>
+                      <div class="flex flex-wrap gap-1">
+                        <button type="button" onclick="insertResultVariable('{{points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Learner total points earned">{{points}}</button>
+                        <button type="button" onclick="insertResultVariable('{{max_points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Total possible points">{{max_points}}</button>
+                        <button type="button" onclick="insertResultVariable('{{percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Score percentage earned">{{percent}}</button>
+                        <button type="button" onclick="insertResultVariable('{{passing_percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Required passing percentage">{{passing_percent}}</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dynamic Message Inputs -->
+                  <div id="results-completion-msg-container" class="space-y-1">
+                    <label class="block font-bold text-slate-700 text-xs">Completion Message (completion_message)</label>
+                    <textarea id="edit-results-completion-msg" rows="2" placeholder="Thanks for attending the quiz." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                  </div>
+
+                  <div id="results-passfail-msg-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                      <label class="block font-bold text-emerald-800 text-xs">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Success Message (Passed)
+                      </label>
+                      <textarea id="edit-results-success-msg" rows="2" placeholder="Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%)." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+
+                    <div class="space-y-1">
+                      <label class="block font-bold text-rose-800 text-xs">
+                        <i class="fa-solid fa-circle-xmark text-rose-600"></i> Failure Message (Not Passed)
+                      </label>
+                      <textarea id="edit-results-failure-msg" rows="2" placeholder="You scored {{percent}}%. You need {{passing_percent}}% to pass." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Assets Color Palette -->
+              <div class="md:col-span-2 border-t border-slate-100 pt-3">
+                <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2">Theme & UI Button Colors (Assets)</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Primary Button</label>
+                    <div class="flex items-center gap-1.5">
+                      <input type="color" id="asset-primary-color" class="w-7 h-7 rounded border border-slate-300 p-0.5 cursor-pointer">
+                      <input type="text" id="asset-primary-hex" class="flex-1 bg-slate-50 border border-slate-300 rounded px-1.5 py-1 text-[10px] font-mono uppercase">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Review Button</label>
+                    <div class="flex items-center gap-1.5">
+                      <input type="color" id="asset-review-color" class="w-7 h-7 rounded border border-slate-300 p-0.5 cursor-pointer">
+                      <input type="text" id="asset-review-hex" class="flex-1 bg-slate-50 border border-slate-300 rounded px-1.5 py-1 text-[10px] font-mono uppercase">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Correct Feedback</label>
+                    <div class="flex items-center gap-1.5">
+                      <input type="color" id="asset-correct-color" class="w-7 h-7 rounded border border-slate-300 p-0.5 cursor-pointer">
+                      <input type="text" id="asset-correct-hex" class="flex-1 bg-slate-50 border border-slate-300 rounded px-1.5 py-1 text-[10px] font-mono uppercase">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Incorrect Feedback</label>
+                    <div class="flex items-center gap-1.5">
+                      <input type="color" id="asset-incorrect-color" class="w-7 h-7 rounded border border-slate-300 p-0.5 cursor-pointer">
+                      <input type="text" id="asset-incorrect-hex" class="flex-1 bg-slate-50 border border-slate-300 rounded px-1.5 py-1 text-[10px] font-mono uppercase">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Questions Manager -->
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-list-check text-indigo-600"></i>
+                  Assessment Questions (<span id="question-count">0</span>)
+                </h3>
+                <p class="text-xs text-slate-500">Native question interaction formats matching schema specification.</p>
+              </div>
+            </div>
+
+            <!-- Quick Template Insertion Bar -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-wrap items-center gap-2 text-xs">
+              <span class="font-bold text-slate-600 uppercase text-[11px] tracking-wide mr-1">
+                <i class="fa-solid fa-plus-circle text-indigo-500"></i> Add Question:
+              </span>
+              <button onclick="addQuestionFromPreset('multiple_choice')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-regular fa-circle-dot text-indigo-500"></i> Multiple Choice
+              </button>
+              <button onclick="addQuestionFromPreset('multiple_response')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-regular fa-square-check text-indigo-500"></i> Multiple Response
+              </button>
+              <button onclick="addQuestionFromPreset('sequence')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-list-ol text-indigo-500"></i> Sequence
+              </button>
+              <button onclick="addQuestionFromPreset('matching')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-link text-indigo-500"></i> Matching
+              </button>
+              <button onclick="addQuestionFromPreset('word_bank')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-font text-indigo-500"></i> Word Bank
+              </button>
+              <button onclick="addQuestionFromPreset('categorization')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-folder-tree text-indigo-500"></i> Categorization
+              </button>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questions-container" class="space-y-4">
+              <!-- Dynamic Question Cards Render Here -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Interactive Live Preview -->
+        <div class="lg:col-span-5 sticky top-24 space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+
+            <!-- Preview Header -->
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs font-bold uppercase tracking-wider">Interactive Live Preview</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btn-prev-preview-q" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <span id="preview-q-index-badge" class="text-xs font-mono text-indigo-300">1 / 1</span>
+                <button id="btn-next-preview-q" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Preview Toolbar -->
+            <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500 font-medium">Direction:</span>
+                <button id="btn-preview-toggle-rtl" class="px-2 py-0.5 rounded border border-slate-300 font-semibold bg-white hover:bg-slate-100 text-[11px] cursor-pointer">
+                  Toggle RTL / LTR
+                </button>
+                <button id="btn-preview-toggle-shuffle" class="px-2 py-0.5 rounded border border-slate-300 font-semibold bg-white hover:bg-slate-100 text-[11px] cursor-pointer flex items-center gap-1 text-slate-700">
+                  <i class="fa-solid fa-shuffle text-indigo-500"></i> <span id="preview-shuffle-label">Shuffle: Off</span>
+                </button>
+                <button id="btn-preview-toggle-view" class="px-2 py-0.5 rounded border border-slate-300 font-semibold bg-white hover:bg-slate-100 text-[11px] cursor-pointer flex items-center gap-1 text-slate-700 transition-all">
+                  <i class="fa-solid fa-flag-checkered text-amber-500"></i> <span id="preview-view-label">Results</span>
+                </button>
+              </div>
+              <button id="btn-reset-preview-answers" class="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-rotate-left text-[10px]"></i> Reset Response
+              </button>
+            </div>
+
+            <!-- Interactive Stage Area -->
+            <div id="preview-stage" class="p-5 min-h-[420px] bg-slate-100/50 flex flex-col justify-between custom-scrollbar">
+              <!-- Live Question Rendered Here -->
+            </div>
+
+            <!-- Feedback & Check Answer Controls -->
+            <div class="p-3.5 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+              <div id="preview-feedback-box" class="hidden text-xs px-3 py-2 rounded-lg flex-1 border"></div>
+              <button id="btn-preview-check-answer" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer flex-shrink-0 flex items-center justify-center gap-1.5 self-end sm:self-center">
+                <i class="fa-solid fa-paper-plane text-[11px]"></i> <span id="btn-preview-submit-label">Submit</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Quick Assessment Summary Box -->
+          <div class="bg-slate-900 text-slate-200 rounded-xl p-4 border border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="font-bold text-slate-300 uppercase text-[11px] tracking-wide">Assessment Summary</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 font-mono text-[11px] text-slate-400">
+              <div>Questions: <span id="sum-q-count" class="text-white font-bold">0</span></div>
+              <div>Points: <span id="sum-points" class="text-white font-bold">0</span></div>
+              <div>Pass: <span id="sum-pass" class="text-white font-bold">80%</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 2: JSON INSPECTOR & EXPORT HUB -->
+    <div id="tab-code" class="tab-content hidden space-y-6">
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Assessment JSON Inspector & Export</h2>
+          <p class="text-xs text-slate-500">Inspect, edit, copy, or download the exact assessment schema payload.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btn-copy-json" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors cursor-pointer">
+            <i class="fa-regular fa-copy"></i> Copy JSON
+          </button>
+          <button id="btn-apply-json" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition-colors cursor-pointer">
+            <i class="fa-solid fa-check"></i> Apply to Builder
+          </button>
+          <button id="btn-download-json-code" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer">
+            <i class="fa-solid fa-download"></i> Download .json
+          </button>
+        </div>
+      </div>
+
+      <textarea id="json-editor" class="w-full h-[540px] bg-slate-900 text-slate-200 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 custom-scrollbar"></textarea>
+
+      <!-- Question Types Reference Grid -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-sm font-bold text-slate-800">Supported Question Types JSON Specifications</h3>
+          <p class="text-xs text-slate-500">Exact JSON structures and presets matching your target assessment schema.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-regular fa-circle-dot"></i> multiple_choice
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Single selection. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1 item marked correct: true.</p>
+            <button onclick="copyTypeTemplate('multiple_choice')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-regular fa-square-check"></i> multiple_response
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Multi-select checkboxes. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1+ correct items.</p>
+            <button onclick="copyTypeTemplate('multiple_response')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-solid fa-list-ol"></i> sequence
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Order ranking. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text }]</code> in exact chronological order.</p>
+            <button onclick="copyTypeTemplate('sequence')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-solid fa-link"></i> matching
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Pair matching. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, target, target_order }]</code>.</p>
+            <button onclick="copyTypeTemplate('matching')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-solid fa-font"></i> word_bank
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Fill-in-the-blanks using <code class="bg-slate-200 px-1 rounded font-mono">body: "Start with {{term}}..."</code> with optional distractors.</p>
+            <button onclick="copyTypeTemplate('word_bank')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+              <i class="fa-solid fa-folder-tree"></i> categorization
+            </div>
+            <p class="text-[11px] text-slate-600 mb-2">Grouping. Requires <code class="bg-slate-200 px-1 rounded font-mono">categories: [{ title }]</code> and <code class="bg-slate-200 px-1 rounded font-mono">items: [{ text, category }]</code>.</p>
+            <button onclick="copyTypeTemplate('categorization')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- IN-APP DELETE CONFIRMATION MODAL -->
+  <div id="delete-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 transform transition-all space-y-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Delete Assessment</h3>
+          <p class="text-xs text-slate-500 mt-1">Are you sure you want to delete this assessment? Its related files will be permanently removed, and the editor will transit to the default assessment template.</p>
+        </div>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Assessment to delete:</div>
+        <div id="delete-modal-title" class="text-sm font-bold text-slate-800 mt-0.5 break-words"></div>
+      </div>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="btn-cancel-delete" type="button" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button id="btn-confirm-delete" type="button" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm cursor-pointer">
+          Yes, Delete Assessment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="app-toast" class="fixed bottom-6 right-6 z-50 transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold translate-y-12 opacity-0 pointer-events-none bg-slate-900 border-slate-800 text-slate-200">
+    <div id="toast-icon"><i class="fa-solid fa-circle-info text-indigo-400 text-sm"></i></div>
+    <div id="toast-message">Notification</div>
+  </div>
+
+  <script>
+    // State management
+    let currentCourseContainer = null;
+    let currentQuiz = null;
+    let currentCourseId = '';
+    let previewQuestionIndex = 0;
+    let previewUserAnswers = {};
+    let previewDirection = 'rtl';
+    let previewResultSimMode = 'pass';
+
+    // DOM Elements
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const selectCourse = document.getElementById('select-course');
+    const jsonEditor = document.getElementById('json-editor');
+    const previewStage = document.getElementById('preview-stage');
+    const previewQIndexBadge = document.getElementById('preview-q-index-badge');
+    const previewFeedbackBox = document.getElementById('preview-feedback-box');
+
+    // Default Assessment Template matching the exact target schema
+    const DEFAULT_ASSESSMENT_TEMPLATE = {
+      quizzes: [
+        {
+          id: "sample-fruit-quiz",
+          title: "Simple Example Quiz",
+          language: "en",
+          direction: "ltr",
+          intro_title: "Try the Example Quiz",
+          intro_body: "This is a simple example showing how different quiz question types work. Replace the sample questions with your own content.",
+          success_message: "Great job! You completed the example quiz successfully.",
+          failure_message: "Review your answers and try again.",
+          passing_score_percent: 80,
+          attempts: 1,
+          shuffle_questions: false,
+          show_feedback: true,
+          assets: {
+            review_button_text: "Review Quiz",
+            review_button_color: "#F59E0B",
+            review_button_text_color: "#FFFFFF",
+            primary_button_color: "#2563EB",
+            primary_button_text_color: "#FFFFFF",
+            correct_feedback_color: "#16A34A",
+            incorrect_feedback_color: "#DC2626"
+          },
+          questions: [
+            {
+              id: "fruit-color",
+              type: "multiple_choice",
+              order: 1,
+              prompt: "Which fruit is usually yellow?",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! Bananas are usually yellow.",
+              incorrect_feedback: "Not quite. Think about the common color of a banana.",
+              items: [
+                { order: 1, text: "Apple", correct: false },
+                { order: 2, text: "Banana", correct: true },
+                { order: 3, text: "Blueberry", correct: false },
+                { order: 4, text: "Grape", correct: false }
+              ]
+            },
+            {
+              id: "daily-sequence",
+              type: "sequence",
+              order: 2,
+              prompt: "Put these parts of the day in the correct order.",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! Morning comes before afternoon and evening.",
+              incorrect_feedback: "Think about how a normal day progresses.",
+              items: [
+                { order: 1, text: "Morning" },
+                { order: 2, text: "Afternoon" },
+                { order: 3, text: "Evening" },
+                { order: 4, text: "Night" }
+              ]
+            },
+            {
+              id: "animal-match",
+              type: "matching",
+              order: 3,
+              prompt: "Match each animal with its sound.",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! All animals are matched with the right sounds.",
+              incorrect_feedback: "Try matching each animal with the sound it normally makes.",
+              items: [
+                { order: 1, text: "Dog", target: "Bark", target_order: 1 },
+                { order: 2, text: "Cat", target: "Meow", target_order: 2 },
+                { order: 3, text: "Cow", target: "Moo", target_order: 3 }
+              ]
+            },
+            {
+              id: "select-fruits",
+              type: "multiple_response",
+              order: 4,
+              prompt: "Which of the following are fruits? Select all that apply.",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! Apple and orange are fruits.",
+              incorrect_feedback: "Choose only the items that are fruits.",
+              items: [
+                { order: 1, text: "Apple", correct: true },
+                { order: 2, text: "Carrot", correct: false },
+                { order: 3, text: "Orange", correct: true },
+                { order: 4, text: "Potato", correct: false }
+              ]
+            },
+            {
+              id: "simple-knowledge",
+              type: "multiple_choice",
+              order: 5,
+              prompt: "Which animal can fly?",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! A bird can fly.",
+              incorrect_feedback: "Think about which animal normally moves through the air.",
+              items: [
+                { order: 1, text: "Bird", correct: true },
+                { order: 2, text: "Dog", correct: false },
+                { order: 3, text: "Fish", correct: false },
+                { order: 4, text: "Horse", correct: false }
+              ]
+            },
+            {
+              id: "complete-sentence",
+              type: "word_bank",
+              order: 6,
+              prompt: "Choose the correct words to complete the sentence.",
+              body: "An {{apple}} is a fruit, the sky is usually {{blue}}, and grass is usually {{green}}.",
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! All words are in the right places.",
+              incorrect_feedback: "Try again and choose the words that best complete the sentence."
+            }
+          ]
+        }
+      ]
+    };
+
+    // Presets for new questions
+    const PRESET_TEMPLATES = {
+      multiple_choice: {
+        id: "mc_question",
+        type: "multiple_choice",
+        prompt: "ما هو الإجراء الصحيح في هذا الموقف؟",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "إجابة صحيحة ومتقنة.",
+        incorrect_feedback: "إجابة غير صحيحة. يرجى مراجعة المعايير.",
+        items: [
+          { order: 1, text: "الخيار الأول (صحيح)", correct: true },
+          { order: 2, text: "الخيار الثاني", correct: false },
+          { order: 3, text: "الخيار الثالث", correct: false }
+        ]
+      },
+      multiple_response: {
+        id: "mr_question",
+        type: "multiple_response",
+        prompt: "اختر جميع الإجراءات الصحيحة التالية:",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "أحسنت! تم تحديد جميع الخيارات الصحيحة.",
+        incorrect_feedback: "تأكد من اختيار كل العناصر المطابقة.",
+        items: [
+          { order: 1, text: "المعيار الأول الصحيح", correct: true },
+          { order: 2, text: "إجراء غير مناسب", correct: false },
+          { order: 3, text: "المعيار الثاني الصحيح", correct: true }
+        ]
+      },
+      sequence: {
+        id: "seq_question",
+        type: "sequence",
+        prompt: "رتب الخطوات التالية بالترتيب الصحيح:",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "ترتيب سليم ومنطقي.",
+        incorrect_feedback: "تحقق من تسلسل المراحل.",
+        items: [
+          { order: 1, text: "الخطوة الأولى: الملاحظة والتقييم" },
+          { order: 2, text: "الخطوة الثانية: التنسيق والتواصل" },
+          { order: 3, text: "الخطوة الثالثة: التنفيذ والمتابعة" }
+        ]
+      },
+      matching: {
+        id: "matching_question",
+        type: "matching",
+        prompt: "طابق كل عنصر مع ما يناسبه:",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "جميع المطابقات صحيحة ومكتملة.",
+        incorrect_feedback: "راجع التوصيلات غير الصحيحة.",
+        items: [
+          { order: 1, text: "المصطلح الأول", target: "الوصف والتعريف الأول", target_order: 1 },
+          { order: 2, text: "المصطلح الثاني", target: "الوصف والتعريف الثاني", target_order: 2 }
+        ]
+      },
+      word_bank: {
+        id: "wordbank_question",
+        type: "word_bank",
+        prompt: "أكمل الجملة باختيار الكلمات المناسبة:",
+        body: "عند تقييم الموقف يجب التركيز على {{المخاطر المباشرة}} ثم تحديد {{الأولويات}} قبل اتخاذ الإجراء.",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "اكتملت الفراغات بالشكل الصحيح.",
+        incorrect_feedback: "تأكد من وضع كل كلمة في مكانها المناسب.",
+        distractors: ["التراجع", "التأجيل"]
+      },
+      categorization: {
+        id: "cat_question",
+        type: "categorization",
+        prompt: "صنف العناصر التالية حسب فئاتها المناسبة:",
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "تصنيف دقيق وصحيح.",
+        incorrect_feedback: "راجع توزيع العناصر على الفئات.",
+        categories: [
+          { order: 1, title: "الإجراءات الوقائية" },
+          { order: 2, title: "الإجراءات العلاجية" }
+        ],
+        items: [
+          { order: 1, text: "ارتداء معدات الحماية", category: "الإجراءات الوقائية" },
+          { order: 2, text: "تقديم الإسعاف الأولي", category: "الإجراءات العلاجية" }
+        ]
+      }
+    };
+
+    // Helper: Format question type to clean capitalized wording (e.g. "Multiple Choice")
+    function formatQuestionTypeName(type) {
+      const typeNames = {
+        multiple_choice: 'Multiple Choice',
+        multiple_response: 'Multiple Response',
+        sequence: 'Sequence',
+        matching: 'Matching',
+        word_bank: 'Word Bank',
+        categorization: 'Categorization'
+      };
+      if (typeNames[type]) return typeNames[type];
+      return String(type || '').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+
+    // Helper: Normalize container to primary quiz
+    function getQuizFromContainer(container) {
+      if (!container) return null;
+      if (Array.isArray(container.quizzes) && container.quizzes.length > 0) {
+        return container.quizzes[0];
+      }
+      if (Array.isArray(container.questions)) {
+        return container;
+      }
+      return null;
+    }
+
+    function buildContainerFromQuiz(quiz) {
+      return {
+        quizzes: [quiz]
+      };
+    }
+
+    // Helper: Determine if feedback is enabled for a given question
+    function isQuestionFeedbackEnabled(q) {
+      if (!q) return true;
+      if (typeof q.show_feedback === 'boolean') {
+        return q.show_feedback;
+      }
+      if (currentQuiz && typeof currentQuiz.show_feedback === 'boolean') {
+        return currentQuiz.show_feedback;
+      }
+      return true;
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('app-toast');
+      const icon = document.getElementById('toast-icon');
+      const text = document.getElementById('toast-message');
+      if (!toast || !text) return;
+
+      toast.className = 'fixed bottom-6 right-6 z-50 transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold';
+      if (type === 'success') {
+        toast.classList.add('bg-emerald-950', 'border-emerald-800', 'text-emerald-200');
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>';
+      } else if (type === 'error') {
+        toast.classList.add('bg-rose-950', 'border-rose-800', 'text-rose-200');
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-400 text-sm"></i>';
+      } else {
+        toast.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-200');
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-info text-indigo-400 text-sm"></i>';
+      }
+
+      text.textContent = message;
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.__toastTimeout);
+      window.__toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // Tab Navigation
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => b.classList.remove('border-indigo-600', 'text-indigo-600', 'bg-indigo-50/50', 'font-semibold'));
+        btn.classList.add('border-indigo-600', 'text-indigo-600', 'bg-indigo-50/50', 'font-semibold');
+
+        tabContents.forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-${targetTab}`).classList.remove('hidden');
+
+        if (targetTab === 'code' && currentQuiz) {
+          syncFormToQuiz();
+          jsonEditor.value = JSON.stringify(buildContainerFromQuiz(currentQuiz), null, 2);
+        }
+      });
+    });
+
+    // Default activate first tab
+    tabBtns[0].click();
+
+    // Fetch Courses List
+    async function loadCoursesList() {
+      try {
+        const res = await fetch('/api/courses');
+        const data = await res.json();
+        selectCourse.innerHTML = '';
+        if (data.ok && data.courses && data.courses.length > 0) {
+          data.courses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.title}${c.isCustom ? ' *' : ''}`;
+            selectCourse.appendChild(opt);
+          });
+          const exists = data.courses.some(c => c.id === currentCourseId);
+          if (!exists) {
+            currentCourseId = data.courses[0].id;
+          }
+          selectCourse.value = currentCourseId;
+        } else {
+          currentCourseId = '';
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '-- Default Template --';
+          selectCourse.appendChild(opt);
+        }
+      } catch (err) {
+        console.error('Failed to load courses list:', err);
+      }
+    }
+
+    // Load Specific Course
+    async function loadCourse(id) {
+      if (!id) return;
+      try {
+        currentCourseId = id;
+        if (selectCourse) selectCourse.value = id;
+        const res = await fetch(`/api/courses/${encodeURIComponent(id)}`);
+        if (!res.ok) throw new Error('Course load failed');
+        const data = await res.json();
+        currentCourseContainer = data;
+        currentQuiz = getQuizFromContainer(data);
+        previewQuestionIndex = 0;
+        previewUserAnswers = {};
+        previewDirection = currentQuiz.direction === 'rtl' ? 'rtl' : 'ltr';
+
+        populateBuilderForm(currentQuiz);
+        renderLivePreview();
+      } catch (err) {
+        console.error('Error loading course:', err.message);
+      }
+    }
+
+    // Populate Form Fields
+    function populateBuilderForm(quiz) {
+      if (!quiz) return;
+      
+      document.getElementById('edit-course-title').value = quiz.title || '';
+      document.getElementById('edit-direction').value = quiz.direction || 'rtl';
+      document.getElementById('edit-passing-score').value = quiz.passing_score_percent ?? 80;
+      document.getElementById('edit-attempts').value = quiz.attempts ?? 1;
+      document.getElementById('edit-intro-body').value = quiz.intro_body || '';
+
+      const shuffleQEl = document.getElementById('edit-shuffle-questions');
+      if (shuffleQEl) shuffleQEl.checked = Boolean(quiz.shuffle_questions);
+
+      const showFbEl = document.getElementById('edit-show-feedback');
+      if (showFbEl) showFbEl.checked = quiz.show_feedback !== false;
+
+      // Populate results_page configuration
+      const rp = quiz.results_page || {};
+      const showResultsEl = document.getElementById('edit-results-show');
+      if (showResultsEl) showResultsEl.checked = rp.show !== false;
+
+      const showGradeEl = document.getElementById('edit-results-show-grade');
+      if (showGradeEl) showGradeEl.checked = Boolean(rp.show_grade);
+
+      const showIconEl = document.getElementById('edit-results-show-icon');
+      if (showIconEl) showIconEl.checked = Boolean(rp.show_result_icon);
+
+      const showReviewEl = document.getElementById('edit-results-show-review');
+      if (showReviewEl) showReviewEl.checked = rp.show_review_button !== false;
+
+      const modeEl = document.getElementById('edit-results-mode');
+      if (modeEl) {
+        modeEl.value = rp.message_mode || (quiz.success_message ? 'pass_fail' : 'completion');
+        updateResultsMessageModeVisibility(modeEl.value);
+      }
+
+      const completionMsgEl = document.getElementById('edit-results-completion-msg');
+      if (completionMsgEl) completionMsgEl.value = rp.completion_message || quiz.success_message || "Thanks for attending the quiz.";
+
+      const successMsgEl = document.getElementById('edit-results-success-msg');
+      if (successMsgEl) successMsgEl.value = rp.success_message || quiz.success_message || "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).";
+
+      const failureMsgEl = document.getElementById('edit-results-failure-msg');
+      if (failureMsgEl) failureMsgEl.value = rp.failure_message || quiz.failure_message || "You scored {{percent}}%. You need {{passing_percent}}% to pass.";
+
+      const assets = quiz.assets || {};
+      const primary = assets.primary_button_color || '#16324F';
+      const review = assets.review_button_color || '#C6922D';
+      const correct = assets.correct_feedback_color || '#178E63';
+      const incorrect = assets.incorrect_feedback_color || '#DB5A4B';
+
+      document.getElementById('asset-primary-color').value = primary;
+      document.getElementById('asset-primary-hex').value = primary;
+      document.getElementById('asset-review-color').value = review;
+      document.getElementById('asset-review-hex').value = review;
+      document.getElementById('asset-correct-color').value = correct;
+      document.getElementById('asset-correct-hex').value = correct;
+      document.getElementById('asset-incorrect-color').value = incorrect;
+      document.getElementById('asset-incorrect-hex').value = incorrect;
+
+      renderQuestionsList(quiz.questions || []);
+      updateSummaryStats();
+    }
+
+    function updateResultsMessageModeVisibility(mode) {
+      const compContainer = document.getElementById('results-completion-msg-container');
+      const passFailContainer = document.getElementById('results-passfail-msg-container');
+      if (!compContainer || !passFailContainer) return;
+      if (mode === 'completion') {
+        compContainer.classList.remove('hidden');
+        passFailContainer.classList.add('hidden');
+      } else {
+        compContainer.classList.add('hidden');
+        passFailContainer.classList.remove('hidden');
+      }
+    }
+
+    window.insertResultVariable = function(varName) {
+      const mode = document.getElementById('edit-results-mode')?.value || 'completion';
+      let targetFieldId = 'edit-results-completion-msg';
+      if (mode === 'pass_fail' || mode === 'score_based') {
+        targetFieldId = 'edit-results-success-msg';
+      }
+      const input = document.getElementById(targetFieldId);
+      if (!input) return;
+      const start = input.selectionStart || input.value.length;
+      const end = input.selectionEnd || input.value.length;
+      const val = input.value;
+      input.value = val.substring(0, start) + varName + val.substring(end);
+      input.focus();
+      input.setSelectionRange(start + varName.length, start + varName.length);
+      syncFormToQuiz();
+      renderLivePreview();
+    };
+
+    window.jumpToPreviewResults = function() {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      previewQuestionIndex = currentQuiz.questions.length;
+      renderLivePreview();
+      showToast('Switched preview to Results Page', 'info');
+    };
+
+    window.enableResultsPageAndRender = function() {
+      const showToggle = document.getElementById('edit-results-show');
+      if (showToggle) showToggle.checked = true;
+      syncFormToQuiz();
+      renderLivePreview();
+      showToast('Results page enabled', 'success');
+    };
+
+    // Sync Form values back to currentQuiz object
+    function syncFormToQuiz() {
+      if (!currentQuiz) return;
+      currentQuiz.title = document.getElementById('edit-course-title')?.value || currentQuiz.title;
+      currentQuiz.intro_title = currentQuiz.title;
+      currentQuiz.direction = document.getElementById('edit-direction')?.value || 'rtl';
+      currentQuiz.language = currentQuiz.direction === 'rtl' ? 'ar' : 'en';
+      currentQuiz.passing_score_percent = Number(document.getElementById('edit-passing-score')?.value ?? 80);
+      currentQuiz.attempts = Number(document.getElementById('edit-attempts')?.value ?? 1);
+      currentQuiz.intro_body = document.getElementById('edit-intro-body')?.value || '';
+
+      const resultsMode = document.getElementById('edit-results-mode')?.value || 'completion';
+      const completionMsg = document.getElementById('edit-results-completion-msg')?.value || 'Thanks for attending the quiz.';
+      const successMsg = document.getElementById('edit-results-success-msg')?.value || 'Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).';
+      const failureMsg = document.getElementById('edit-results-failure-msg')?.value || 'You scored {{percent}}%. You need {{passing_percent}}% to pass.';
+
+      currentQuiz.results_page = {
+        show: document.getElementById('edit-results-show')?.checked ?? true,
+        show_grade: document.getElementById('edit-results-show-grade')?.checked ?? false,
+        message_mode: resultsMode,
+        completion_message: completionMsg,
+        success_message: successMsg,
+        failure_message: failureMsg,
+        show_result_icon: document.getElementById('edit-results-show-icon')?.checked ?? false,
+        show_review_button: document.getElementById('edit-results-show-review')?.checked ?? true
+      };
+
+      currentQuiz.success_message = successMsg;
+      currentQuiz.failure_message = failureMsg;
+
+      currentQuiz.shuffle_questions = Boolean(document.getElementById('edit-shuffle-questions')?.checked);
+      currentQuiz.show_feedback = document.getElementById('edit-show-feedback')?.checked ?? true;
+
+      currentQuiz.assets = {
+        review_button_text: "مراجعة الاختبار",
+        review_button_color: document.getElementById('asset-review-color')?.value || '#C6922D',
+        review_button_text_color: "#FFFFFF",
+        primary_button_color: document.getElementById('asset-primary-color')?.value || '#16324F',
+        primary_button_text_color: "#FFFFFF",
+        correct_feedback_color: document.getElementById('asset-correct-color')?.value || '#178E63',
+        incorrect_feedback_color: document.getElementById('asset-incorrect-color')?.value || '#DB5A4B'
+      };
+    }
+
+    // Settings fields auto-sync
+    ['edit-course-title', 'edit-intro-body', 'edit-results-completion-msg', 'edit-results-success-msg', 'edit-results-failure-msg'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        syncFormToQuiz();
+        renderLivePreview();
+      });
+    });
+
+    ['edit-results-show', 'edit-results-show-grade', 'edit-results-show-icon', 'edit-results-show-review'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', () => {
+        syncFormToQuiz();
+        renderLivePreview();
+      });
+    });
+
+    document.getElementById('edit-results-mode')?.addEventListener('change', (e) => {
+      updateResultsMessageModeVisibility(e.target.value);
+      syncFormToQuiz();
+      renderLivePreview();
+    });
+
+    ['edit-shuffle-questions'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', (e) => {
+        syncFormToQuiz();
+        previewUserAnswers = {};
+        renderLivePreview();
+        showToast(`Global shuffle ${e.target.checked ? 'enabled' : 'disabled'}`, 'info');
+      });
+    });
+
+    ['edit-show-feedback'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', (e) => {
+        syncFormToQuiz();
+        renderLivePreview();
+        renderQuestionsList(currentQuiz.questions || []);
+        showToast(`Assessment feedback ${e.target.checked ? 'enabled' : 'disabled'}`, 'info');
+      });
+    });
+
+    ['edit-direction'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', (e) => {
+        syncFormToQuiz();
+        previewDirection = e.target.value === 'rtl' ? 'rtl' : 'ltr';
+        renderLivePreview();
+      });
+    });
+
+    ['edit-passing-score', 'edit-attempts'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        syncFormToQuiz();
+        updateSummaryStats();
+        renderLivePreview();
+      });
+    });
+
+    // Color sync events
+    function setupColorSync(colorId, hexId) {
+      const colorInput = document.getElementById(colorId);
+      const hexInput = document.getElementById(hexId);
+      if (!colorInput || !hexInput) return;
+
+      colorInput.addEventListener('input', (e) => {
+        hexInput.value = e.target.value;
+        syncFormToQuiz();
+        renderLivePreview();
+      });
+      hexInput.addEventListener('change', (e) => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          colorInput.value = val;
+          syncFormToQuiz();
+          renderLivePreview();
+        }
+      });
+    }
+
+    setupColorSync('asset-primary-color', 'asset-primary-hex');
+    setupColorSync('asset-review-color', 'asset-review-hex');
+    setupColorSync('asset-correct-color', 'asset-correct-hex');
+    setupColorSync('asset-incorrect-color', 'asset-incorrect-hex');
+
+    // Update Summary Header Stats
+    function updateSummaryStats() {
+      if (!currentQuiz) return;
+      const count = currentQuiz.questions?.length || 0;
+      const totalPoints = (currentQuiz.questions || []).reduce((sum, q) => sum + (q.points ?? 1), 0);
+      const pass = currentQuiz.passing_score_percent ?? 80;
+
+      document.getElementById('question-count').textContent = count;
+      document.getElementById('badge-total-points').textContent = `Total Points: ${totalPoints}`;
+      document.getElementById('sum-q-count').textContent = count;
+      document.getElementById('sum-points').textContent = totalPoints;
+      document.getElementById('sum-pass').textContent = `${pass}%`;
+    }
+
+    // Render Question Cards in Editor
+    function renderQuestionsList(questions) {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        q.order = idx + 1;
+        const card = document.createElement('div');
+        card.className = 'border border-slate-200 rounded-xl p-4 bg-slate-50/60 hover:bg-white transition-colors space-y-3 shadow-2xs';
+        
+        let detailsHtml = '';
+        if (q.type === 'multiple_choice' || q.type === 'multiple_response') {
+          detailsHtml = `
+            <div class="mt-2 space-y-2 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                  Answer Items (${q.items?.length || 0}) — <span class="text-indigo-600 font-semibold font-sans normal-case">${q.type === 'multiple_choice' ? 'Select 1 correct option' : 'Check all correct options'}</span>
+                </span>
+                <button type="button" onclick="addChoiceItem(${idx})" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-plus text-[10px]"></i> Add Option
+                </button>
+              </div>
+              <div class="space-y-2">
+                ${(q.items || []).map((item, cIdx) => `
+                  <div class="flex items-center gap-2 text-xs">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded cursor-pointer hover:bg-slate-100 select-none">
+                      <input type="${q.type === 'multiple_choice' ? 'radio' : 'checkbox'}" name="correct_item_${idx}" ${item.correct ? 'checked' : ''} onchange="toggleChoiceCorrect(${idx}, ${cIdx}, '${q.type}')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                      <span class="font-semibold text-[11px] ${item.correct ? 'text-emerald-700 font-bold' : 'text-slate-500'}">${item.correct ? '✓ Correct' : 'Option'}</span>
+                    </label>
+                    <input type="text" value="${(item.text || '').replace(/"/g, '&quot;')}" onchange="updateChoiceText(${idx}, ${cIdx}, this.value)" class="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500">
+                    <button type="button" onclick="removeChoiceItem(${idx}, ${cIdx})" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer" title="Delete Option">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (q.type === 'sequence') {
+          detailsHtml = `
+            <div class="mt-2 space-y-2 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                  Sequence Items (Listed in exact chronological sequence)
+                </span>
+                <button type="button" onclick="addSequenceItem(${idx})" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-plus text-[10px]"></i> Add Step
+                </button>
+              </div>
+              <div class="space-y-2">
+                ${(q.items || []).map((item, iIdx) => `
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-5 h-5 rounded bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">${iIdx + 1}</span>
+                    <input type="text" value="${(item.text || '').replace(/"/g, '&quot;')}" onchange="updateSequenceItemText(${idx}, ${iIdx}, this.value)" class="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500">
+                    <div class="flex items-center gap-1">
+                      <button type="button" onclick="moveSequenceItem(${idx}, ${iIdx}, -1)" ${iIdx === 0 ? 'disabled class="text-slate-300 px-1"' : 'class="text-slate-600 hover:text-indigo-600 px-1 cursor-pointer"'} title="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
+                      <button type="button" onclick="moveSequenceItem(${idx}, ${iIdx}, 1)" ${iIdx === (q.items?.length || 0) - 1 ? 'disabled class="text-slate-300 px-1"' : 'class="text-slate-600 hover:text-indigo-600 px-1 cursor-pointer"'} title="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
+                    <button type="button" onclick="removeSequenceItem(${idx}, ${iIdx})" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer" title="Delete Step">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (q.type === 'matching') {
+          detailsHtml = `
+            <div class="mt-2 space-y-2 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                  Matching Items (Left Concept → Right Target Match)
+                </span>
+                <button type="button" onclick="addMatchingItem(${idx})" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-plus text-[10px]"></i> Add Pair
+                </button>
+              </div>
+              <div class="space-y-2">
+                ${(q.items || []).map((item, mIdx) => `
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs items-center bg-slate-50 p-2 rounded border border-slate-200">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-slate-500 text-[10px]">Concept:</span>
+                      <input type="text" value="${(item.text || '').replace(/"/g, '&quot;')}" onchange="updateMatchingItem(${idx}, ${mIdx}, 'text', this.value)" placeholder="Left Concept" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-slate-500 text-[10px]">Target:</span>
+                      <input type="text" value="${(item.target || '').replace(/"/g, '&quot;')}" onchange="updateMatchingItem(${idx}, ${mIdx}, 'target', this.value)" placeholder="Right Target Definition" class="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs">
+                      <button type="button" onclick="removeMatchingItem(${idx}, ${mIdx})" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer" title="Delete Pair"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (q.type === 'word_bank') {
+          const isQuizRtl = (currentQuiz && currentQuiz.direction === 'rtl');
+          const bodyPlaceholder = isQuizRtl 
+            ? 'ابدأ بـ {{ملاحظة}} البيئة ثم قم بـ {{تقييم}} المعلومات...' 
+            : 'e.g. An {{apple}} is a fruit, the sky is {{blue}}, and grass is {{green}}.';
+          const distractorsPlaceholder = isQuizRtl 
+            ? 'مثال: التراجع، التأجيل' 
+            : 'e.g. orange, pear, grape';
+
+          detailsHtml = `
+            <div class="mt-2 space-y-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div>
+                <label class="block font-bold text-slate-700 uppercase tracking-wide text-xs mb-1">
+                  Sentence Body (Use <code class="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">{{word}}</code> to create fill-in blanks)
+                </label>
+                <textarea rows="2" onchange="updateQuestion(${idx}, 'body', this.value)" placeholder="${bodyPlaceholder}" class="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 leading-relaxed font-sans">${(q.body || '').replace(/"/g, '&quot;')}</textarea>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 uppercase tracking-wide text-xs mb-1">Distractors (Optional incorrect words pool, comma-separated)</label>
+                <input type="text" value="${((q.distractors || []).join(', ')).replace(/"/g, '&quot;')}" onchange="updateDistractors(${idx}, this.value)" placeholder="${distractorsPlaceholder}" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs">
+              </div>
+            </div>
+          `;
+        } else if (q.type === 'categorization') {
+          detailsHtml = `
+            <div class="mt-2 space-y-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div class="space-y-2 border-b border-slate-100 pb-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">1. Categories</span>
+                  <button type="button" onclick="addCategory(${idx})" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Add Category
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  ${(q.categories || []).map((cat, catIdx) => `
+                    <div class="flex items-center gap-2 text-xs bg-indigo-50/50 p-1.5 rounded border border-indigo-100">
+                      <input type="text" value="${(cat.title || '').replace(/"/g, '&quot;')}" onchange="updateCategoryTitle(${idx}, ${catIdx}, this.value)" placeholder="Category Title" class="flex-1 bg-white border border-slate-300 rounded px-2 py-0.5 text-xs font-semibold">
+                      <button type="button" onclick="removeCategory(${idx}, ${catIdx})" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">2. Items & Assignments</span>
+                  <button type="button" onclick="addCatItem(${idx})" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Add Item
+                  </button>
+                </div>
+                <div class="space-y-2">
+                  ${(q.items || []).map((item, itemIdx) => `
+                    <div class="flex items-center gap-2 text-xs">
+                      <input type="text" value="${(item.text || '').replace(/"/g, '&quot;')}" onchange="updateCatItemText(${idx}, ${itemIdx}, this.value)" placeholder="Item Description" class="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs">
+                      <select onchange="updateCatItemCategory(${idx}, ${itemIdx}, this.value)" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-indigo-700 cursor-pointer">
+                        ${(q.categories || []).map(cat => `<option value="${cat.title}" ${cat.title === item.category ? 'selected' : ''}>→ ${cat.title}</option>`).join('')}
+                      </select>
+                      <button type="button" onclick="removeCatItem(${idx}, ${itemIdx})" class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        const isFeedbackEnabled = q.show_feedback !== false;
+        const feedbackAndSettingsHtml = `
+          <div class="bg-slate-100/70 p-3 rounded-lg border border-slate-200 space-y-2.5">
+            <!-- Feedback Switch -->
+            <div class="flex items-center justify-between p-2 rounded bg-white/80 border border-slate-200/80">
+              <div class="pr-2">
+                <label for="q-feedback-toggle-${idx}" class="text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+                  <i class="fa-solid fa-comment-dots text-indigo-500"></i> Question Feedback
+                </label>
+                <span class="text-[10px] text-slate-500 block">Show explanation on submit for this question</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="q-feedback-toggle-${idx}" ${isFeedbackEnabled ? 'checked' : ''} onchange="toggleQuestionFeedback(${idx}, this.checked)" class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            ${isFeedbackEnabled ? `
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-200/80">
+                <div>
+                  <label class="block font-semibold text-emerald-800 mb-1">Correct Feedback</label>
+                  <input type="text" value="${(q.correct_feedback || '').replace(/"/g, '&quot;')}" placeholder="e.g. Correct. Well done!" onchange="updateQuestion(${idx}, 'correct_feedback', this.value)" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block font-semibold text-rose-800 mb-1">Incorrect Feedback</label>
+                  <input type="text" value="${(q.incorrect_feedback || '').replace(/"/g, '&quot;')}" placeholder="e.g. Try again." onchange="updateQuestion(${idx}, 'incorrect_feedback', this.value)" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-2 focus:ring-rose-500">
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+              <select onchange="changeQuestionType(${idx}, this.value)" class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-0.5 cursor-pointer focus:outline-none">
+                <option value="multiple_choice" ${q.type === 'multiple_choice' ? 'selected' : ''}>Multiple Choice</option>
+                <option value="multiple_response" ${q.type === 'multiple_response' ? 'selected' : ''}>Multiple Response</option>
+                <option value="sequence" ${q.type === 'sequence' ? 'selected' : ''}>Sequence</option>
+                <option value="matching" ${q.type === 'matching' ? 'selected' : ''}>Matching</option>
+                <option value="word_bank" ${q.type === 'word_bank' ? 'selected' : ''}>Word Bank</option>
+                <option value="categorization" ${q.type === 'categorization' ? 'selected' : ''}>Categorization</option>
+              </select>
+              <span class="text-xs text-slate-400 font-mono">${q.id}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold cursor-pointer" onclick="setPreviewQuestion(${idx})" title="Preview this question">
+                <i class="fa-solid fa-eye"></i> Preview
+              </button>
+              <button class="text-slate-400 hover:text-rose-600 text-xs font-medium cursor-pointer" onclick="removeQuestion(${idx})">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            <div class="md:col-span-3">
+              <label class="block font-semibold text-slate-700 mb-1">Prompt / Question Text</label>
+              <input type="text" value="${(q.prompt || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${idx}, 'prompt', this.value)" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Points</label>
+              <input type="number" value="${q.points ?? 10}" onchange="updateQuestion(${idx}, 'points', Number(this.value))" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          ${detailsHtml}
+          ${feedbackAndSettingsHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.setPreviewResultSim = function(mode) {
+      previewResultSimMode = mode;
+      renderLivePreview();
+    };
+
+    // Set Active Preview Question
+    window.setPreviewQuestion = function(idx) {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      if (idx >= 0 && idx <= currentQuiz.questions.length) {
+        previewQuestionIndex = idx;
+        previewUserAnswers = {};
+        renderLivePreview();
+      }
+    };
+
+    // Render Live Preview Stage (Fully supports native snake_case schema & results_page)
+    function renderLivePreview() {
+      if (!currentQuiz || !currentQuiz.questions || currentQuiz.questions.length === 0) {
+        previewStage.innerHTML = `
+          <div class="flex-1 flex flex-col items-center justify-center text-slate-400 text-center p-6 space-y-2">
+            <i class="fa-solid fa-circle-question text-3xl text-slate-300"></i>
+            <p class="text-xs font-medium">No questions in assessment yet.<br>Click "Add Question" on the left to start.</p>
+          </div>
+        `;
+        previewQIndexBadge.textContent = '0 / 0';
+        previewFeedbackBox.className = 'hidden';
+        return;
+      }
+
+      const totalQ = currentQuiz.questions.length;
+      const assets = currentQuiz.assets || {};
+      const primaryColor = assets.primary_button_color || '#16324F';
+      const isRtl = previewDirection === 'rtl' || currentQuiz.direction === 'rtl';
+      const dirClass = isRtl ? 'rtl-text' : '';
+
+      // Update Preview Toolbar Shuffle indicator button
+      const isAssessmentShuffle = Boolean(currentQuiz.shuffle_questions);
+      const shuffleLabel = document.getElementById('preview-shuffle-label');
+      const shuffleBtn = document.getElementById('btn-preview-toggle-shuffle');
+      if (shuffleLabel) {
+        shuffleLabel.textContent = isAssessmentShuffle ? 'Shuffle: ON' : 'Shuffle: OFF';
+      }
+      if (shuffleBtn) {
+        if (isAssessmentShuffle) {
+          shuffleBtn.className = 'px-2 py-0.5 rounded border border-indigo-300 font-semibold bg-indigo-50 text-indigo-700 text-[11px] cursor-pointer flex items-center gap-1 shadow-2xs transition-all';
+        } else {
+          shuffleBtn.className = 'px-2 py-0.5 rounded border border-slate-300 font-semibold bg-white hover:bg-slate-100 text-[11px] cursor-pointer flex items-center gap-1 text-slate-700 transition-all';
+        }
+      }
+
+      // Update Preview View Toggle button (Questions vs Results)
+      const isViewingResults = previewQuestionIndex >= totalQ;
+      const viewToggleBtn = document.getElementById('btn-preview-toggle-view');
+      const viewLabel = document.getElementById('preview-view-label');
+      if (viewLabel) {
+        viewLabel.textContent = isViewingResults ? 'Questions' : 'Results';
+      }
+      if (viewToggleBtn) {
+        if (isViewingResults) {
+          viewToggleBtn.className = 'px-2 py-0.5 rounded border border-amber-300 font-semibold bg-amber-50 text-amber-800 text-[11px] cursor-pointer flex items-center gap-1 shadow-2xs transition-all';
+        } else {
+          viewToggleBtn.className = 'px-2 py-0.5 rounded border border-slate-300 font-semibold bg-white hover:bg-slate-100 text-[11px] cursor-pointer flex items-center gap-1 text-slate-700 transition-all';
+        }
+      }
+
+      const prevBtn = document.getElementById('btn-prev-preview-q');
+      const nextBtn = document.getElementById('btn-next-preview-q');
+      const submitBtn = document.getElementById('btn-preview-check-answer');
+      const submitLabel = document.getElementById('btn-preview-submit-label');
+
+      // Update Prev / Next button states
+      if (prevBtn) {
+        prevBtn.disabled = previewQuestionIndex <= 0;
+        prevBtn.className = previewQuestionIndex <= 0 ? 'text-xs px-2 py-1 bg-slate-800/50 rounded text-slate-600 cursor-not-allowed' : 'text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer';
+      }
+      if (nextBtn) {
+        nextBtn.disabled = previewQuestionIndex >= totalQ;
+        nextBtn.className = previewQuestionIndex >= totalQ ? 'text-xs px-2 py-1 bg-slate-800/50 rounded text-slate-600 cursor-not-allowed' : 'text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer';
+      }
+
+      // -------------------------------------------------------------
+      // CASE A: RENDER RESULTS PAGE (LAST PAGE IN PREVIEW)
+      // -------------------------------------------------------------
+      if (isViewingResults) {
+        previewQIndexBadge.innerHTML = '<span class="text-amber-300 font-bold flex items-center gap-1"><i class="fa-solid fa-flag-checkered text-[11px]"></i> Results</span>';
+        previewFeedbackBox.className = 'hidden';
+
+        if (submitLabel) submitLabel.textContent = isRtl ? 'إعادة المحاولة' : 'Restart Assessment';
+        if (submitBtn) {
+          submitBtn.onclick = () => setPreviewQuestion(0);
+        }
+
+        const rp = currentQuiz.results_page || {
+          show: true,
+          show_grade: false,
+          message_mode: "completion",
+          completion_message: "Thanks for attending the quiz.",
+          success_message: "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).",
+          failure_message: "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
+          show_result_icon: false,
+          show_review_button: true
+        };
+
+        if (rp.show === false) {
+          previewStage.innerHTML = `
+            <div class="${dirClass} space-y-4 my-auto text-center p-6 bg-amber-50/80 rounded-2xl border border-amber-200">
+              <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mx-auto shadow-2xs">
+                <i class="fa-solid fa-eye-slash"></i>
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-sm sm:text-base font-bold text-amber-950">${isRtl ? 'صفحة النتائج معطلة' : 'Results Page Disabled'}</h3>
+                <p class="text-xs text-amber-800 max-w-sm mx-auto">
+                  <code>results_page.show: false</code> is set. Learners will finish the assessment immediately without viewing a results screen.
+                </p>
+              </div>
+              <button onclick="enableResultsPageAndRender()" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs cursor-pointer shadow-2xs transition-all">
+                <i class="fa-solid fa-toggle-on mr-1"></i> Enable Results Screen
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Calculate score variables
+        const totalPoints = currentQuiz.questions.reduce((sum, q) => sum + (q.points ?? 10), 0);
+        const passingPercent = currentQuiz.passing_score_percent ?? 80;
+        const isPassedSim = previewResultSimMode === 'pass';
+        const simPercent = isPassedSim ? 100 : Math.max(0, Math.round(passingPercent * 0.6));
+        const simEarnedPoints = isPassedSim ? totalPoints : Math.round((totalPoints * simPercent) / 100);
+
+        const vars = {
+          points: simEarnedPoints,
+          max_points: totalPoints,
+          percent: simPercent,
+          passing_percent: passingPercent
+        };
+
+        const interpolate = (txt) => {
+          if (!txt) return '';
+          return txt
+            .replace(/\{\{points\}\}/g, vars.points)
+            .replace(/\{\{max_points\}\}/g, vars.max_points)
+            .replace(/\{\{percent\}\}/g, vars.percent)
+            .replace(/\{\{passing_percent\}\}/g, vars.passing_percent);
+        };
+
+        const mode = rp.message_mode || 'completion';
+        let renderedMsg = '';
+        if (mode === 'completion') {
+          renderedMsg = interpolate(rp.completion_message || currentQuiz.success_message || "Thanks for attending the quiz.");
+        } else {
+          if (isPassedSim) {
+            renderedMsg = interpolate(rp.success_message || currentQuiz.success_message || "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).");
+          } else {
+            renderedMsg = interpolate(rp.failure_message || currentQuiz.failure_message || "You scored {{percent}}%. You need {{passing_percent}}% to pass.");
+          }
+        }
+
+        const reviewColor = assets.review_button_color || '#C6922D';
+        const reviewText = assets.review_button_text || (isRtl ? 'مراجعة الاختبار' : 'Review Quiz');
+        const showIcon = rp.show_result_icon !== false;
+        const showGrade = Boolean(rp.show_grade);
+        const showReview = rp.show_review_button !== false;
+
+        let iconHtml = '';
+        if (showIcon) {
+          if (mode === 'completion') {
+            iconHtml = `
+              <div class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-2xs mx-auto">
+                <i class="fa-solid fa-award"></i>
+              </div>
+            `;
+          } else if (isPassedSim) {
+            iconHtml = `
+              <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl shadow-2xs mx-auto">
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+            `;
+          } else {
+            iconHtml = `
+              <div class="w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-3xl shadow-2xs mx-auto">
+                <i class="fa-solid fa-rotate-right"></i>
+              </div>
+            `;
+          }
+        }
+
+        let titleText = isRtl ? 'اكتمل الاختبار' : 'Assessment Completed';
+        let statusBadge = '';
+        if (mode === 'completion') {
+          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">${isRtl ? 'مكتمل' : 'Completed'}</span>`;
+        } else if (isPassedSim) {
+          titleText = isRtl ? 'تهانينا! لقد اجتزت الاختبار' : 'Congratulations! You Passed';
+          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">${isRtl ? 'ناجح' : 'Passed'}</span>`;
+        } else {
+          titleText = isRtl ? 'لم يتم اجتياز الاختبار' : 'Assessment Not Passed';
+          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">${isRtl ? 'لم يجتز' : 'Did Not Pass'}</span>`;
+        }
+
+        let gradeCardsHtml = '';
+        if (showGrade) {
+          gradeCardsHtml = `
+            <div class="grid grid-cols-3 gap-2.5 pt-1">
+              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'النقاط' : 'Score'}</span>
+                <span class="text-sm sm:text-base font-extrabold text-slate-900">${vars.points} / ${vars.max_points}</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'النسبة' : 'Percentage'}</span>
+                <span class="text-sm sm:text-base font-extrabold ${isPassedSim ? 'text-emerald-600' : 'text-rose-600'}">${vars.percent}%</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'درجة النجاح' : 'Passing Score'}</span>
+                <span class="text-sm sm:text-base font-extrabold text-slate-700">${vars.passing_percent}%</span>
+              </div>
+            </div>
+          `;
+        }
+
+        let reviewBtnHtml = '';
+        if (showReview) {
+          reviewBtnHtml = `
+            <div class="pt-2 text-center">
+              <button onclick="setPreviewQuestion(0)" class="px-5 py-2.5 rounded-xl text-xs font-bold shadow-2xs hover:opacity-90 transition-all cursor-pointer text-white inline-flex items-center gap-1.5" style="background-color: ${reviewColor};">
+                <i class="fa-solid fa-rotate-left text-xs"></i> ${reviewText}
+              </button>
+            </div>
+          `;
+        }
+
+        previewStage.innerHTML = `
+          <div class="${dirClass} space-y-4">
+            <!-- Outcome Simulation Switcher -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 text-xs">
+              <span class="text-slate-500 font-semibold flex items-center gap-1.5 text-[11px]">
+                <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> Outcome Simulator:
+              </span>
+              <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs text-[11px]">
+                <button onclick="setPreviewResultSim('pass')" class="px-2.5 py-1 rounded font-bold transition-all cursor-pointer ${previewResultSimMode === 'pass' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50'}">
+                  ✓ Pass View
+                </button>
+                <button onclick="setPreviewResultSim('fail')" class="px-2.5 py-1 rounded font-bold transition-all cursor-pointer ${previewResultSimMode === 'fail' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-50'}">
+                  ✕ Fail View
+                </button>
+              </div>
+            </div>
+
+            <!-- Main Results Content Card -->
+            <div class="text-center space-y-3 py-2">
+              ${iconHtml}
+              <div class="space-y-1">
+                <h3 class="text-base sm:text-lg font-bold text-slate-900">${titleText}</h3>
+                ${statusBadge}
+              </div>
+
+              <div class="p-4 rounded-xl ${isPassedSim || mode === 'completion' ? 'bg-indigo-50/70 border border-indigo-200/80 text-indigo-950' : 'bg-rose-50/70 border border-rose-200/80 text-rose-950'} text-xs sm:text-sm font-medium leading-relaxed shadow-2xs text-center max-w-lg mx-auto">
+                ${renderedMsg}
+              </div>
+
+              ${gradeCardsHtml}
+              ${reviewBtnHtml}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // CASE B: RENDER QUESTION (Q1 to QN)
+      // -------------------------------------------------------------
+      const q = currentQuiz.questions[previewQuestionIndex];
+      previewQIndexBadge.textContent = `${previewQuestionIndex + 1} / ${totalQ}`;
+      previewFeedbackBox.className = 'hidden';
+
+      if (submitLabel) {
+        submitLabel.textContent = isRtl ? 'إرسال الإجابة' : 'Submit Answer';
+      }
+      if (submitBtn) {
+        submitBtn.onclick = null; // restored to check-answer listener
+      }
+
+      let bodyHtml = '';
+
+      if (q.type === 'multiple_choice') {
+        if (!previewUserAnswers.displayedChoices || previewUserAnswers.forQuestionId !== (q.id || `q_${previewQuestionIndex}`)) {
+          previewUserAnswers.forQuestionId = (q.id || `q_${previewQuestionIndex}`);
+          const rawItems = (q.items || []).map((item, originalIndex) => ({ ...item, originalIndex }));
+          if (isAssessmentShuffle || q.shuffle) {
+            previewUserAnswers.displayedChoices = [...rawItems].sort(() => 0.5 - Math.random());
+          } else {
+            previewUserAnswers.displayedChoices = rawItems;
+          }
+        }
+        const choices = previewUserAnswers.displayedChoices || [];
+        bodyHtml = `
+          <div class="space-y-2.5">
+            ${choices.map((item) => `
+              <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/20 transition-all cursor-pointer shadow-2xs">
+                <input type="radio" name="preview_mc" value="${item.originalIndex}" ${previewUserAnswers.choice === item.originalIndex ? 'checked' : ''} onchange="selectPreviewMc(${item.originalIndex})" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                <span class="text-xs font-medium text-slate-800 flex-1">${item.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'multiple_response') {
+        if (!previewUserAnswers.displayedChoices || previewUserAnswers.forQuestionId !== (q.id || `q_${previewQuestionIndex}`)) {
+          previewUserAnswers.forQuestionId = (q.id || `q_${previewQuestionIndex}`);
+          const rawItems = (q.items || []).map((item, originalIndex) => ({ ...item, originalIndex }));
+          if (isAssessmentShuffle || q.shuffle) {
+            previewUserAnswers.displayedChoices = [...rawItems].sort(() => 0.5 - Math.random());
+          } else {
+            previewUserAnswers.displayedChoices = rawItems;
+          }
+        }
+        const choices = previewUserAnswers.displayedChoices || [];
+        const checkedSet = new Set(previewUserAnswers.multiChoice || []);
+        bodyHtml = `
+          <div class="space-y-2.5">
+            ${choices.map((item) => `
+              <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/20 transition-all cursor-pointer shadow-2xs">
+                <input type="checkbox" value="${item.originalIndex}" ${checkedSet.has(item.originalIndex) ? 'checked' : ''} onchange="togglePreviewMr(${item.originalIndex})" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer">
+                <span class="text-xs font-medium text-slate-800 flex-1">${item.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'sequence') {
+        if (!previewUserAnswers.sequenceItems || previewUserAnswers.forSeqQuestionId !== (q.id || `q_${previewQuestionIndex}`)) {
+          previewUserAnswers.forSeqQuestionId = (q.id || `q_${previewQuestionIndex}`);
+          const originalItems = [...(q.items || [])];
+          if (isAssessmentShuffle || q.shuffle) {
+            previewUserAnswers.sequenceItems = [...originalItems].sort(() => 0.5 - Math.random());
+          } else {
+            previewUserAnswers.sequenceItems = originalItems;
+          }
+        }
+        const items = previewUserAnswers.sequenceItems || [];
+        bodyHtml = `
+          <div class="space-y-2">
+            <p class="text-[11px] text-slate-500 italic mb-2">${isRtl ? 'استخدم الأسهم لإعادة ترتيب الخطوات بالتسلسل الصحيح:' : 'Use arrows to rearrange steps into the correct sequence:'}</p>
+            ${items.map((item, iIdx) => `
+              <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white shadow-2xs">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">${iIdx + 1}</span>
+                  <span class="text-xs font-medium text-slate-800">${item.text}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="movePreviewSeqItem(${iIdx}, -1)" ${iIdx === 0 ? 'disabled class="text-slate-300 p-1"' : 'class="text-indigo-600 hover:bg-indigo-50 p-1 rounded cursor-pointer"'}><i class="fa-solid fa-arrow-up text-xs"></i></button>
+                  <button onclick="movePreviewSeqItem(${iIdx}, 1)" ${iIdx === items.length - 1 ? 'disabled class="text-slate-300 p-1"' : 'class="text-indigo-600 hover:bg-indigo-50 p-1 rounded cursor-pointer"'}><i class="fa-solid fa-arrow-down text-xs"></i></button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'matching') {
+        const leftItems = q.items || [];
+        if (!previewUserAnswers.shuffledTargets || previewUserAnswers.forMatchQuestionId !== (q.id || `q_${previewQuestionIndex}`)) {
+          previewUserAnswers.forMatchQuestionId = (q.id || `q_${previewQuestionIndex}`);
+          const targets = leftItems.map(p => p.target);
+          if (isAssessmentShuffle || q.shuffle !== false) {
+            previewUserAnswers.shuffledTargets = [...targets].sort(() => 0.5 - Math.random());
+          } else {
+            previewUserAnswers.shuffledTargets = targets;
+          }
+        }
+        const rightTargets = previewUserAnswers.shuffledTargets || [];
+        const currentMatches = previewUserAnswers.matches || {};
+
+        bodyHtml = `
+          <div class="space-y-2.5">
+            ${leftItems.map((item, idx) => {
+              const selectedTarget = currentMatches[idx] || '';
+              return `
+              <div class="p-3 rounded-xl border ${selectedTarget ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200 bg-white'} shadow-2xs space-y-1.5 transition-colors">
+                <span class="text-xs font-bold text-slate-900 block">${item.text}</span>
+                <select onchange="selectPreviewMatch(${idx}, this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 cursor-pointer font-medium">
+                  <option value="">${isRtl ? '— اختر المطابقة المناسبة —' : '— Select matching target —'}</option>
+                  ${rightTargets.map(t => {
+                    const isSelectedByThis = (selectedTarget === t);
+                    const isUsedByOther = Object.entries(currentMatches).some(([otherIdx, val]) => String(otherIdx) !== String(idx) && val === t);
+                    if (isUsedByOther) {
+                      return `<option value="${t}" disabled class="text-slate-400 bg-slate-100">${t} (${isRtl ? 'تم الاختيار' : 'Already selected'})</option>`;
+                    }
+                    return `<option value="${t}" ${isSelectedByThis ? 'selected' : ''}>${t}</option>`;
+                  }).join('')}
+                </select>
+              </div>
+            `;
+            }).join('')}
+          </div>
+        `;
+      } else if (q.type === 'word_bank') {
+        const rawBody = q.body || '';
+        const regex = /\{\{([^}]+)\}\}/g;
+        const extractedBlanks = [...rawBody.matchAll(regex)].map((m, bIdx) => ({ id: `b_${bIdx}`, word: m[1] }));
+        
+        if (!previewUserAnswers.wordPool || previewUserAnswers.forWbQuestionId !== (q.id || `q_${previewQuestionIndex}`)) {
+          previewUserAnswers.forWbQuestionId = (q.id || `q_${previewQuestionIndex}`);
+          const pool = [...extractedBlanks.map(b => b.word), ...(q.distractors || [])];
+          if (isAssessmentShuffle || q.shuffle !== false) {
+            previewUserAnswers.wordPool = [...pool].sort(() => 0.5 - Math.random());
+          } else {
+            previewUserAnswers.wordPool = pool;
+          }
+        }
+
+        const blankValues = previewUserAnswers.blanks || {};
+        
+        // Parse segments for rendering
+        const parts = rawBody.split(/(\{\{[^}]+\}\})/g);
+        let blankCounter = 0;
+
+        // Calculate usage of each word from pool
+        const wordPoolCounts = {};
+        (previewUserAnswers.wordPool || []).forEach(w => {
+          wordPoolCounts[w] = (wordPoolCounts[w] || 0) + 1;
+        });
+        const filledCounts = {};
+        Object.values(blankValues).forEach(v => {
+          if (v) filledCounts[v] = (filledCounts[v] || 0) + 1;
+        });
+
+        bodyHtml = `
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl bg-white border border-slate-200 leading-relaxed text-xs sm:text-sm text-slate-800 shadow-2xs">
+              ${parts.map(part => {
+                const match = part.match(/^\{\{([^}]+)\}\}$/);
+                if (match) {
+                  const bId = `b_${blankCounter++}`;
+                  const val = blankValues[bId] || '';
+                  return `
+                    <button onclick="clearPreviewBlank('${bId}')" class="inline-flex items-center justify-center min-w-[90px] px-2.5 py-1 mx-1 border-b-2 font-bold ${val ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-indigo-400 bg-indigo-50/50 text-indigo-400'} rounded text-xs transition-all cursor-pointer">
+                      ${val || '_______'}
+                    </button>
+                  `;
+                }
+                return `<span>${part}</span>`;
+              }).join('')}
+            </div>
+
+            <!-- Word Bank Pool -->
+            <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+              <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide block">${isRtl ? 'اضغط على الكلمة لملء الفراغ التالي:' : 'Click word to fill the next blank:'}</span>
+              <div class="flex flex-wrap gap-2">
+                ${(previewUserAnswers.wordPool || []).map(w => {
+                  const used = (filledCounts[w] || 0) >= (wordPoolCounts[w] || 1);
+                  if (used) {
+                    return `
+                      <button disabled class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-400 text-xs font-semibold shadow-2xs cursor-not-allowed opacity-60 line-through decoration-slate-300">
+                        ${w}
+                      </button>
+                    `;
+                  }
+                  return `
+                    <button onclick="fillNextPreviewBlank('${w.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 hover:bg-indigo-600 hover:text-white text-xs font-semibold transition-all shadow-2xs cursor-pointer">
+                      ${w}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (q.type === 'categorization') {
+        const categories = q.categories || [];
+        const items = q.items || [];
+        const assignments = previewUserAnswers.catAssignments || {};
+
+        bodyHtml = `
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${categories.map(cat => `
+                <div class="p-2.5 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 min-h-[90px] space-y-1.5">
+                  <div class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide border-b border-indigo-100 pb-1 flex items-center justify-between">
+                    <span>${cat.title}</span>
+                    <span class="text-[10px] bg-indigo-200/70 text-indigo-800 px-1.5 py-0.5 rounded font-mono">${items.filter(i => assignments[i.text] === cat.title).length}</span>
+                  </div>
+                  <div class="space-y-1">
+                    ${items.filter(i => assignments[i.text] === cat.title).map(i => `
+                      <span class="inline-block text-[11px] font-medium bg-white text-indigo-950 px-2 py-1 rounded border border-indigo-200 shadow-2xs mr-1">${i.text}</span>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide block">Assign items:</span>
+              <div class="space-y-1.5">
+                ${items.map(item => `
+                  <div class="flex items-center justify-between gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200">
+                    <span class="font-medium text-slate-800">${item.text}</span>
+                    <select onchange="assignPreviewCatItem('${item.text}', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-indigo-700 cursor-pointer">
+                      <option value="">${isRtl ? '— اختر الفئة —' : '— Select Category —'}</option>
+                      ${categories.map(c => `<option value="${c.title}" ${assignments[item.text] === c.title ? 'selected' : ''}>${c.title}</option>`).join('')}
+                    </select>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      previewStage.innerHTML = `
+        <div class="${dirClass} space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full text-white shadow-2xs" style="background-color: ${primaryColor};">
+              ${formatQuestionTypeName(q.type)}
+            </span>
+            <span class="text-xs font-bold text-slate-600">${q.points ?? 10} Points</span>
+          </div>
+
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+            ${q.prompt}
+          </h3>
+
+          ${bodyHtml}
+        </div>
+      `;
+    }
+
+    // Preview Interactive Handlers
+    window.selectPreviewMc = function(index) {
+      previewUserAnswers.choice = index;
+    };
+
+    window.togglePreviewMr = function(index) {
+      if (!previewUserAnswers.multiChoice) previewUserAnswers.multiChoice = [];
+      const pos = previewUserAnswers.multiChoice.indexOf(index);
+      if (pos >= 0) previewUserAnswers.multiChoice.splice(pos, 1);
+      else previewUserAnswers.multiChoice.push(index);
+    };
+
+    window.movePreviewSeqItem = function(index, dir) {
+      const q = currentQuiz.questions[previewQuestionIndex];
+      if (!previewUserAnswers.sequenceItems) previewUserAnswers.sequenceItems = [...(q.items || [])];
+      const target = index + dir;
+      if (target < 0 || target >= previewUserAnswers.sequenceItems.length) return;
+      const tmp = previewUserAnswers.sequenceItems[index];
+      previewUserAnswers.sequenceItems[index] = previewUserAnswers.sequenceItems[target];
+      previewUserAnswers.sequenceItems[target] = tmp;
+      renderLivePreview();
+    };
+
+    window.selectPreviewMatch = function(index, rightVal) {
+      if (!previewUserAnswers.matches) previewUserAnswers.matches = {};
+      if (rightVal && rightVal.trim() !== '') {
+        previewUserAnswers.matches[index] = rightVal;
+      } else {
+        delete previewUserAnswers.matches[index];
+      }
+      renderLivePreview();
+    };
+
+    window.assignPreviewCatItem = function(itemText, catTitle) {
+      if (!previewUserAnswers.catAssignments) previewUserAnswers.catAssignments = {};
+      if (catTitle && catTitle.trim() !== '') {
+        previewUserAnswers.catAssignments[itemText] = catTitle;
+      } else {
+        delete previewUserAnswers.catAssignments[itemText];
+      }
+      renderLivePreview();
+    };
+
+    window.fillNextPreviewBlank = function(word) {
+      const q = currentQuiz.questions[previewQuestionIndex];
+      if (!previewUserAnswers.blanks) previewUserAnswers.blanks = {};
+      const blanks = [...(q.body || '').matchAll(/\{\{([^}]+)\}\}/g)].map((m, i) => `b_${i}`);
+      const firstEmpty = blanks.find(bId => !previewUserAnswers.blanks[bId]);
+      if (firstEmpty) {
+        previewUserAnswers.blanks[firstEmpty] = word;
+        renderLivePreview();
+      }
+    };
+
+    window.clearPreviewBlank = function(blankId) {
+      if (previewUserAnswers.blanks) {
+        delete previewUserAnswers.blanks[blankId];
+        renderLivePreview();
+      }
+    };
+
+    // Check Answer & Evaluate
+    document.getElementById('btn-preview-check-answer')?.addEventListener('click', () => {
+      if (!currentQuiz || !currentQuiz.questions || currentQuiz.questions.length === 0) return;
+      if (previewQuestionIndex >= currentQuiz.questions.length) {
+        setPreviewQuestion(0);
+        return;
+      }
+      const q = currentQuiz.questions[previewQuestionIndex];
+      const isRtl = previewDirection === 'rtl' || (currentQuiz && currentQuiz.direction === 'rtl');
+
+      // 1. Mandatory Answering Validation Across All Question Types
+      let isAnswered = false;
+      let validationMsg = '';
+
+      if (q.type === 'multiple_choice') {
+        isAnswered = typeof previewUserAnswers.choice === 'number' && previewUserAnswers.choice >= 0;
+        validationMsg = isRtl ? 'يرجى تحديد خيار للإجابة قبل الإرسال.' : 'Please select an option before submitting.';
+      } else if (q.type === 'multiple_response') {
+        isAnswered = Array.isArray(previewUserAnswers.multiChoice) && previewUserAnswers.multiChoice.length > 0;
+        validationMsg = isRtl ? 'يرجى اختيار خيار واحد على الأقل قبل الإرسال.' : 'Please select at least one option before submitting.';
+      } else if (q.type === 'sequence') {
+        const currentItems = previewUserAnswers.sequenceItems || q.items || [];
+        isAnswered = currentItems.length > 0;
+        validationMsg = isRtl ? 'يرجى ترتيب جميع عناصر التسلسل قبل الإرسال.' : 'Please arrange all sequence items before submitting.';
+      } else if (q.type === 'matching') {
+        const items = q.items || [];
+        const matches = previewUserAnswers.matches || {};
+        const answeredCount = items.filter((_, idx) => Boolean(matches[idx] && matches[idx].trim())).length;
+        isAnswered = items.length > 0 && answeredCount === items.length;
+        validationMsg = isRtl ? 'يرجى مطابقة جميع العناصر قبل الإرسال.' : 'Please match all items before submitting.';
+      } else if (q.type === 'word_bank') {
+        const blanks = [...(q.body || '').matchAll(/\{\{([^}]+)\}\}/g)].map((m, i) => `b_${i}`);
+        const userBlanks = previewUserAnswers.blanks || {};
+        const filledCount = blanks.filter(bId => Boolean(userBlanks[bId] && userBlanks[bId].trim())).length;
+        isAnswered = blanks.length > 0 && filledCount === blanks.length;
+        validationMsg = isRtl ? 'يرجى ملء جميع الفراغات بالكلمات المناسبة قبل الإرسال.' : 'Please fill in all blanks before submitting.';
+      } else if (q.type === 'categorization') {
+        const items = q.items || [];
+        const assigns = previewUserAnswers.catAssignments || {};
+        const assignedCount = items.filter(it => Boolean(assigns[it.text] && assigns[it.text].trim())).length;
+        isAnswered = items.length > 0 && assignedCount === items.length;
+        validationMsg = isRtl ? 'يرجى تصنيف جميع العناصر قبل الإرسال.' : 'Please categorize all items before submitting.';
+      } else {
+        isAnswered = true;
+      }
+
+      if (!isAnswered) {
+        previewFeedbackBox.className = 'text-xs px-3 py-2 rounded-lg flex-1 border shadow-2xs transition-all bg-amber-50/95 text-amber-950 border-amber-300';
+        const noticePrefix = isRtl ? 'تنبيه:' : 'Notice:';
+        previewFeedbackBox.innerHTML = `
+          <div class="flex items-start gap-1.5 ${isRtl ? 'rtl-text' : ''}">
+            <i class="fa-solid fa-triangle-exclamation text-xs mt-0.5 shrink-0 text-amber-600"></i>
+            <div class="text-xs leading-snug">
+              <span class="font-bold text-amber-800">${noticePrefix}</span>
+              <span class="ml-1 text-amber-900">${validationMsg}</span>
+            </div>
+          </div>
+        `;
+        showToast(validationMsg, 'warning');
+        return;
+      }
+
+      // 2. Correctness Evaluation
+      let isCorrect = false;
+
+      if (q.type === 'multiple_choice') {
+        const correctIdx = (q.items || []).findIndex(c => c.correct);
+        isCorrect = correctIdx !== -1 && previewUserAnswers.choice === correctIdx;
+      } else if (q.type === 'multiple_response') {
+        const correctIndices = (q.items || []).map((c, i) => c.correct ? i : null).filter(i => i !== null).sort();
+        const userIndices = (previewUserAnswers.multiChoice || []).slice().sort();
+        isCorrect = JSON.stringify(correctIndices) === JSON.stringify(userIndices);
+      } else if (q.type === 'sequence') {
+        const currentItems = previewUserAnswers.sequenceItems || q.items || [];
+        const originalTexts = (q.items || []).map(i => i.text);
+        const currentTexts = currentItems.map(i => i.text);
+        isCorrect = JSON.stringify(originalTexts) === JSON.stringify(currentTexts);
+      } else if (q.type === 'matching') {
+        const matches = previewUserAnswers.matches || {};
+        isCorrect = (q.items || []).every((item, idx) => matches[idx] === item.target);
+      } else if (q.type === 'word_bank') {
+        const blanks = [...(q.body || '').matchAll(/\{\{([^}]+)\}\}/g)].map(m => m[1]);
+        const userBlanks = previewUserAnswers.blanks || {};
+        isCorrect = blanks.every((targetWord, idx) => {
+          const userVal = (userBlanks[`b_${idx}`] || '').trim().toLowerCase();
+          return targetWord.trim().toLowerCase() === userVal;
+        });
+      } else if (q.type === 'categorization') {
+        const assigns = previewUserAnswers.catAssignments || {};
+        isCorrect = (q.items || []).every(item => assigns[item.text] === item.category);
+      }
+
+      // 3. Render Feedback or Submitted Banner based on show_feedback
+      const isFeedbackActive = isQuestionFeedbackEnabled(q);
+
+      if (!isFeedbackActive) {
+        previewFeedbackBox.className = 'text-xs px-3 py-2 rounded-lg flex-1 border shadow-2xs transition-all bg-slate-100/95 text-slate-800 border-slate-300';
+        const prefix = isRtl ? 'تم الإرسال:' : 'Submitted:';
+        const msg = isRtl ? 'تم تسجيل إجابتك بنجاح.' : 'Your answer has been submitted successfully.';
+
+        previewFeedbackBox.innerHTML = `
+          <div class="flex items-start gap-1.5 ${isRtl ? 'rtl-text' : ''}">
+            <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0 text-slate-600"></i>
+            <div class="text-xs leading-snug">
+              <span class="font-bold text-slate-800">${prefix}</span>
+              <span class="ml-1 text-slate-600">${msg}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        previewFeedbackBox.className = 'text-xs px-3 py-2 rounded-lg flex-1 border shadow-2xs transition-all';
+
+        const correctColor = (currentQuiz.assets && currentQuiz.assets.correct_feedback_color) || '#16A34A';
+        const incorrectColor = (currentQuiz.assets && currentQuiz.assets.incorrect_feedback_color) || '#DC2626';
+
+        if (isCorrect) {
+          previewFeedbackBox.classList.add('bg-emerald-50/90', 'text-emerald-950', 'border-emerald-200');
+          const defaultMsg = isRtl ? 'أحسنت، إجابة صحيحة.' : 'Correct! Well done.';
+          const feedbackMsg = q.correct_feedback || defaultMsg;
+          const prefix = isRtl ? 'صحيح:' : 'Correct:';
+
+          previewFeedbackBox.innerHTML = `
+            <div class="flex items-start gap-1.5 ${isRtl ? 'rtl-text' : ''}">
+              <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0" style="color: ${correctColor};"></i>
+              <div class="text-xs leading-snug">
+                <span class="font-bold" style="color: ${correctColor};">${prefix}</span>
+                <span class="ml-1">${feedbackMsg}</span>
+              </div>
+            </div>
+          `;
+        } else {
+          previewFeedbackBox.classList.add('bg-rose-50/90', 'text-rose-950', 'border-rose-200');
+          const defaultMsg = isRtl ? 'تحقق من المعطيات وحاول مرة أخرى.' : 'Incorrect. Try again.';
+          const feedbackMsg = q.incorrect_feedback || defaultMsg;
+          const prefix = isRtl ? 'غير صحيح:' : 'Incorrect:';
+
+          previewFeedbackBox.innerHTML = `
+            <div class="flex items-start gap-1.5 ${isRtl ? 'rtl-text' : ''}">
+              <i class="fa-solid fa-circle-xmark text-xs mt-0.5 shrink-0" style="color: ${incorrectColor};"></i>
+              <div class="text-xs leading-snug">
+                <span class="font-bold" style="color: ${incorrectColor};">${prefix}</span>
+                <span class="ml-1">${feedbackMsg}</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+    });
+
+    // Preview Toolbar Navigation
+    document.getElementById('btn-prev-preview-q')?.addEventListener('click', () => {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      if (previewQuestionIndex > 0) {
+        previewQuestionIndex--;
+        previewUserAnswers = {};
+        renderLivePreview();
+      }
+    });
+
+    document.getElementById('btn-next-preview-q')?.addEventListener('click', () => {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      if (previewQuestionIndex < currentQuiz.questions.length) {
+        previewQuestionIndex++;
+        previewUserAnswers = {};
+        renderLivePreview();
+      }
+    });
+
+    document.getElementById('btn-preview-toggle-view')?.addEventListener('click', () => {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      const totalQ = currentQuiz.questions.length;
+      if (previewQuestionIndex >= totalQ) {
+        previewQuestionIndex = 0;
+      } else {
+        previewQuestionIndex = totalQ;
+      }
+      previewUserAnswers = {};
+      renderLivePreview();
+    });
+
+    document.getElementById('btn-preview-toggle-rtl')?.addEventListener('click', () => {
+      previewDirection = previewDirection === 'rtl' ? 'ltr' : 'rtl';
+      renderLivePreview();
+    });
+
+    document.getElementById('btn-preview-toggle-shuffle')?.addEventListener('click', () => {
+      if (!currentQuiz) return;
+      const newShuffleState = !currentQuiz.shuffle_questions;
+      currentQuiz.shuffle_questions = newShuffleState;
+      const shuffleInput = document.getElementById('edit-shuffle-questions');
+      if (shuffleInput) shuffleInput.checked = newShuffleState;
+      previewUserAnswers = {};
+      renderLivePreview();
+      showToast(`Global shuffle ${newShuffleState ? 'enabled' : 'disabled'}`, 'info');
+    });
+
+    document.getElementById('btn-reset-preview-answers')?.addEventListener('click', () => {
+      previewUserAnswers = {};
+      renderLivePreview();
+    });
+
+    // Editor Question Manipulation Helpers
+    window.addQuestionFromPreset = function(type) {
+      if (!currentQuiz) return;
+      if (!currentQuiz.questions) currentQuiz.questions = [];
+      const preset = PRESET_TEMPLATES[type] || PRESET_TEMPLATES.multiple_choice;
+      const newQ = JSON.parse(JSON.stringify(preset));
+      newQ.id = `${type}_${Date.now().toString().slice(-4)}`;
+      newQ.order = currentQuiz.questions.length + 1;
+      currentQuiz.questions.push(newQ);
+      renderQuestionsList(currentQuiz.questions);
+      updateSummaryStats();
+      previewQuestionIndex = currentQuiz.questions.length - 1;
+      previewUserAnswers = {};
+      renderLivePreview();
+      showToast(`Added ${formatQuestionTypeName(type)} question`, 'success');
+    };
+
+    window.removeQuestion = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions) return;
+      if (currentQuiz.questions.length <= 1) {
+        return showToast('At least 1 question is required.', 'error');
+      }
+      currentQuiz.questions.splice(qIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      updateSummaryStats();
+      if (previewQuestionIndex >= currentQuiz.questions.length) {
+        previewQuestionIndex = Math.max(0, currentQuiz.questions.length - 1);
+      }
+      previewUserAnswers = {};
+      renderLivePreview();
+      showToast('Question deleted', 'info');
+    };
+
+    window.changeQuestionType = function(qIdx, newType) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const oldQ = currentQuiz.questions[qIdx];
+      const preset = PRESET_TEMPLATES[newType] || PRESET_TEMPLATES.multiple_choice;
+      const converted = JSON.parse(JSON.stringify(preset));
+      converted.id = oldQ.id || `${newType}_${Date.now().toString().slice(-4)}`;
+      converted.prompt = oldQ.prompt || converted.prompt;
+      converted.points = oldQ.points || converted.points;
+      converted.order = qIdx + 1;
+      currentQuiz.questions[qIdx] = converted;
+      renderQuestionsList(currentQuiz.questions);
+      previewUserAnswers = {};
+      renderLivePreview();
+    };
+
+    window.updateQuestion = function(qIdx, field, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx][field] = val;
+      updateSummaryStats();
+      renderLivePreview();
+    };
+
+    window.toggleQuestionFeedback = function(qIdx, isEnabled) {
+      if (!currentQuiz || !currentQuiz.questions || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].show_feedback = isEnabled;
+      syncFormToQuiz();
+      renderLivePreview();
+      renderQuestionsList(currentQuiz.questions);
+    };
+
+    window.toggleQuestionShuffle = function(qIdx, isEnabled) {
+      if (!currentQuiz || !currentQuiz.questions || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].shuffle = isEnabled;
+      syncFormToQuiz();
+      if (previewQuestionIndex === qIdx) {
+        previewUserAnswers = {};
+      }
+      renderLivePreview();
+      renderQuestionsList(currentQuiz.questions);
+    };
+
+    window.updateDistractors = function(qIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const items = val.split(',').map(s => s.trim()).filter(Boolean);
+      currentQuiz.questions[qIdx].distractors = items;
+      previewUserAnswers = {};
+      renderLivePreview();
+    };
+
+    // Choices
+    window.addChoiceItem = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items) q.items = [];
+      q.items.push({ order: q.items.length + 1, text: `خيار جديد ${q.items.length + 1}`, correct: false });
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.removeChoiceItem = function(qIdx, cIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items || q.items.length <= 2) return showToast('At least 2 choices are required.', 'error');
+      q.items.splice(cIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.updateChoiceText = function(qIdx, cIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].items[cIdx].text = val;
+      renderLivePreview();
+    };
+
+    window.toggleChoiceCorrect = function(qIdx, cIdx, type) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (type === 'multiple_choice') {
+        q.items.forEach((c, i) => { c.correct = i === cIdx; });
+      } else {
+        q.items[cIdx].correct = !q.items[cIdx].correct;
+      }
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    // Sequence
+    window.addSequenceItem = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items) q.items = [];
+      q.items.push({ order: q.items.length + 1, text: `الخطوة التالية ${q.items.length + 1}` });
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.removeSequenceItem = function(qIdx, iIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items || q.items.length <= 2) return showToast('At least 2 sequence items are required.', 'error');
+      q.items.splice(iIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.updateSequenceItemText = function(qIdx, iIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].items[iIdx].text = val;
+      renderLivePreview();
+    };
+
+    window.moveSequenceItem = function(qIdx, itemIdx, dir) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      const target = itemIdx + dir;
+      if (target < 0 || target >= q.items.length) return;
+      const tmp = q.items[itemIdx];
+      q.items[itemIdx] = q.items[target];
+      q.items[target] = tmp;
+      renderQuestionsList(currentQuiz.questions);
+      previewUserAnswers = {};
+      renderLivePreview();
+    };
+
+    // Matching
+    window.addMatchingItem = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items) q.items = [];
+      q.items.push({ order: q.items.length + 1, text: `مفهوم ${q.items.length + 1}`, target: `الوصف والتعريف ${q.items.length + 1}`, target_order: q.items.length + 1 });
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.removeMatchingItem = function(qIdx, mIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items || q.items.length <= 2) return showToast('At least 2 pairs are required.', 'error');
+      q.items.splice(mIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.updateMatchingItem = function(qIdx, mIdx, field, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].items[mIdx][field] = val;
+      renderLivePreview();
+    };
+
+    // Categorization
+    window.addCategory = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.categories) q.categories = [];
+      q.categories.push({ order: q.categories.length + 1, title: `فئة جديدة ${q.categories.length + 1}` });
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.removeCategory = function(qIdx, catIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.categories || q.categories.length <= 2) return showToast('At least 2 categories are required.', 'error');
+      q.categories.splice(catIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.updateCategoryTitle = function(qIdx, catIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].categories[catIdx].title = val;
+      renderLivePreview();
+    };
+
+    window.addCatItem = function(qIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items) q.items = [];
+      const defaultCat = (q.categories && q.categories[0]?.title) || 'فئة 1';
+      q.items.push({ order: q.items.length + 1, text: `عنصر جديد ${q.items.length + 1}`, category: defaultCat });
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.removeCatItem = function(qIdx, itemIdx) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      const q = currentQuiz.questions[qIdx];
+      if (!q.items || q.items.length <= 2) return showToast('At least 2 items are required.', 'error');
+      q.items.splice(itemIdx, 1);
+      renderQuestionsList(currentQuiz.questions);
+      renderLivePreview();
+    };
+
+    window.updateCatItemText = function(qIdx, itemIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].items[itemIdx].text = val;
+      renderLivePreview();
+    };
+
+    window.updateCatItemCategory = function(qIdx, itemIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].items[itemIdx].category = val;
+      renderLivePreview();
+    };
+
+    // Copy Type Template for Code Hub
+    window.copyTypeTemplate = function(type) {
+      if (PRESET_TEMPLATES[type]) {
+        navigator.clipboard.writeText(JSON.stringify(PRESET_TEMPLATES[type], null, 2));
+        showToast(`Copied ${type} JSON template to clipboard!`, 'success');
+      }
+    };
+
+    // Load Default Template Function
+    function loadDefaultAssessmentTemplate(isNew = false) {
+      const template = JSON.parse(JSON.stringify(DEFAULT_ASSESSMENT_TEMPLATE));
+      const quiz = template.quizzes[0];
+      
+      if (isNew) {
+        const uniqueSuffix = Date.now().toString().slice(-4);
+        quiz.id = `assessment-template-${uniqueSuffix}`;
+        quiz.title = "تقييم جديد - New Assessment";
+        quiz.intro_title = quiz.title;
+      }
+      
+      currentCourseContainer = template;
+      currentQuiz = quiz;
+      currentCourseId = isNew ? '' : quiz.id;
+      
+      if (selectCourse) {
+        selectCourse.value = '';
+      }
+      previewQuestionIndex = 0;
+      previewUserAnswers = {};
+      previewDirection = currentQuiz.direction === 'rtl' ? 'rtl' : 'ltr';
+      populateBuilderForm(currentQuiz);
+      renderLivePreview();
+      if (jsonEditor) {
+        jsonEditor.value = JSON.stringify(currentCourseContainer, null, 2);
+      }
+    }
+
+    // Save Course to Server
+    document.getElementById('btn-save-course')?.addEventListener('click', async () => {
+      if (!currentQuiz) return;
+      syncFormToQuiz();
+      const container = buildContainerFromQuiz(currentQuiz);
+
+      try {
+        const res = await fetch('/api/courses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(container)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('Assessment saved successfully!', 'success');
+          await loadCoursesList();
+          if (selectCourse) selectCourse.value = data.id;
+          currentCourseId = data.id;
+        } else {
+          showToast('Save failed: ' + (data.validation?.errors?.[0]?.message || data.error || 'Validation error'), 'error');
+        }
+      } catch (err) {
+        showToast('Save error: ' + err.message, 'error');
+      }
+    });
+
+    // Create New Assessment
+    document.getElementById('btn-new-course')?.addEventListener('click', () => {
+      loadDefaultAssessmentTemplate(true);
+      showToast('Preloaded default assessment template ready for editing', 'success');
+    });
+
+    // Export Assessment JSON
+    function getAssessmentFilename(quiz) {
+      const title = (quiz?.title || '').trim();
+      if (title) {
+        const sanitized = title.replace(/[\/\\?%*:|"<>]/g, '_').trim();
+        if (sanitized) return `${sanitized}.json`;
+      }
+      return `${quiz?.id || 'assessment'}.json`;
+    }
+
+    async function exportCourseJson() {
+      if (!currentQuiz) return;
+      syncFormToQuiz();
+      const container = buildContainerFromQuiz(currentQuiz);
+
+      try {
+        const res = await fetch('/api/export-json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(container)
+        });
+        const data = await res.json();
+        if (data.ok && data.downloadUrl) {
+          const downloadFilename = getAssessmentFilename(currentQuiz);
+          const blob = new Blob([JSON.stringify(container, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = downloadFilename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Assessment JSON exported!', 'success');
+        } else {
+          showToast('Export validation error: ' + (data.report?.errors?.[0]?.message || data.error), 'error');
+        }
+      } catch (err) {
+        showToast('Export failed: ' + err.message, 'error');
+      }
+    }
+
+    document.getElementById('btn-download-json')?.addEventListener('click', exportCourseJson);
+    document.getElementById('btn-download-json-header')?.addEventListener('click', exportCourseJson);
+    document.getElementById('btn-download-json-code')?.addEventListener('click', exportCourseJson);
+
+    // Delete Modal & Action Handlers
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const deleteModalTitle = document.getElementById('delete-modal-title');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+
+    let pendingDeleteId = '';
+
+    function openDeleteModal() {
+      const targetId = selectCourse?.value || currentCourseId || currentQuiz?.id;
+      if (!targetId || targetId === 'sample-fruit-quiz' || (currentQuiz && currentQuiz.id === 'sample-fruit-quiz')) {
+        showToast('The default example assessment template is non-deletable.', 'info');
+        return;
+      }
+      const title = currentQuiz?.title || targetId || 'Active Assessment';
+      pendingDeleteId = targetId || '';
+
+      if (deleteModalTitle) {
+        deleteModalTitle.textContent = `"${title}"`;
+      }
+      if (deleteModal) {
+        deleteModal.classList.remove('hidden');
+      }
+    }
+
+    function closeDeleteModal() {
+      if (deleteModal) {
+        deleteModal.classList.add('hidden');
+      }
+      pendingDeleteId = '';
+    }
+
+    document.getElementById('btn-delete-course')?.addEventListener('click', openDeleteModal);
+    btnCancelDelete?.addEventListener('click', closeDeleteModal);
+    deleteModal?.addEventListener('click', (e) => {
+      if (e.target === deleteModal) closeDeleteModal();
+    });
+
+    btnConfirmDelete?.addEventListener('click', async () => {
+      const targetId = pendingDeleteId || selectCourse?.value || currentCourseId || currentQuiz?.id;
+      closeDeleteModal();
+
+      showToast('Deleting assessment and files...', 'info');
+
+      try {
+        if (targetId) {
+          await fetch(`/api/courses/${encodeURIComponent(targetId)}`, { method: 'DELETE' });
+        }
+        if (currentQuiz?.id && currentQuiz.id !== targetId) {
+          await fetch(`/api/courses/${encodeURIComponent(currentQuiz.id)}`, { method: 'DELETE' }).catch(() => {});
+        }
+
+        await loadCoursesList();
+        loadDefaultAssessmentTemplate();
+        showToast('Assessment deleted. Loaded default template.', 'success');
+      } catch (err) {
+        console.error('Delete error:', err);
+        showToast('Delete error: ' + err.message, 'error');
+        loadDefaultAssessmentTemplate();
+      }
+    });
+
+    selectCourse?.addEventListener('change', (e) => {
+      if (e.target.value) {
+        loadCourse(e.target.value);
+      } else {
+        loadDefaultAssessmentTemplate();
+      }
+    });
+
+    // Code Hub: Copy & Apply JSON
+    document.getElementById('btn-copy-json')?.addEventListener('click', () => {
+      if (jsonEditor) {
+        navigator.clipboard.writeText(jsonEditor.value);
+        showToast('Assessment JSON copied to clipboard!', 'success');
+      }
+    });
+
+    document.getElementById('btn-apply-json')?.addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(jsonEditor.value);
+        const quiz = getQuizFromContainer(parsed);
+        if (!quiz) throw new Error('Invalid assessment JSON: missing questions or quizzes array');
+        currentCourseContainer = parsed;
+        currentQuiz = quiz;
+        populateBuilderForm(currentQuiz);
+        renderLivePreview();
+        showToast('JSON applied to Assessment Builder & Live Preview!', 'success');
+        const builderTab = document.querySelector('.tab-btn[data-tab="builder"]');
+        if (builderTab) builderTab.click();
+      } catch (e) {
+        showToast('Invalid JSON syntax: ' + e.message, 'error');
+      }
+    });
+
+    // Initial Load
+    loadCoursesList().then(() => {
+      if (currentCourseId && selectCourse && selectCourse.value) {
+        loadCourse(selectCourse.value);
+      } else {
+        loadDefaultAssessmentTemplate();
+      }
+    });
+  </script>
+</body>
+</html>

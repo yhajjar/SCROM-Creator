@@ -1,0 +1,6 @@
+{
+  "name": "Assessment Creator",
+  "description": "Visual assessment and quiz question creator supporting 6 interaction types, live preview, and clean JSON export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

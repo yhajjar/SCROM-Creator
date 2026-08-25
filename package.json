@@ -8,16 +8,22 @@
   },
   "scripts": {
     "build": "tsc",
+    "start": "npm run build && node dist/src/server.js",
+    "lint": "tsc --noEmit",
     "test": "npm run build && node --test \"dist/test/*.test.js\"",
     "scorm": "npm run build --silent && node dist/src/cli.js"
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
     "yauzl": "^3.2.0",
     "yazl": "^3.3.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.0.0",
     "@types/yauzl": "^2.10.3",
     "@types/yazl": "^3.3.0",

@@ -1,89 +1,173 @@
 export type Direction = "ltr" | "rtl" | "auto";
 
-export interface Theme {
-  primary?: string;
-  secondary?: string;
-  background?: string;
-  surface?: string;
-  text?: string;
-  fontFamily?: string;
-  logo?: string;
+export interface QuizAssets {
+  review_button_text?: string;
+  review_button_color?: string;
+  review_button_text_color?: string;
+  primary_button_color?: string;
+  primary_button_text_color?: string;
+  correct_feedback_color?: string;
+  incorrect_feedback_color?: string;
+  [key: string]: string | undefined;
 }
 
-export interface QuestionBase {
+export interface ChoiceItem {
+  order?: number;
+  text: string;
+  correct?: boolean;
+}
+
+export interface SequenceItem {
+  order?: number;
+  text: string;
+}
+
+export interface MatchingItem {
+  order?: number;
+  text: string;
+  target: string;
+  target_order?: number;
+}
+
+export interface CategorizationCategory {
+  order?: number;
+  title: string;
+}
+
+export interface CategorizationItem {
+  order?: number;
+  text: string;
+  category: string;
+}
+
+export interface MultipleChoiceQuizQuestion {
   id: string;
-  type: Question["type"];
+  type: "multiple_choice";
+  order?: number;
   prompt: string;
   points?: number;
-  image?: string;
-  correctFeedback?: string;
-  incorrectFeedback?: string;
-  direction?: Direction;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+  items: ChoiceItem[];
 }
 
-export interface Choice {
+export interface MultipleResponseQuizQuestion {
   id: string;
-  text: string;
-  correct: boolean;
+  type: "multiple_response";
+  order?: number;
+  prompt: string;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+  items: ChoiceItem[];
 }
 
-export interface MultipleChoiceQuestion extends QuestionBase {
-  type: "multipleChoice";
-  choices: Choice[];
-}
-
-export interface MultipleResponseQuestion extends QuestionBase {
-  type: "multipleResponse";
-  choices: Choice[];
-}
-
-export interface SequenceQuestion extends QuestionBase {
+export interface SequenceQuizQuestion {
+  id: string;
   type: "sequence";
-  items: Array<{ id: string; text: string }>;
+  order?: number;
+  prompt: string;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+  items: SequenceItem[];
 }
 
-export interface MatchingQuestion extends QuestionBase {
+export interface MatchingQuizQuestion {
+  id: string;
   type: "matching";
-  pairs: Array<{ id: string; left: string; right: string }>;
+  order?: number;
+  prompt: string;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+  items: MatchingItem[];
 }
 
-export interface CategorizationQuestion extends QuestionBase {
-  type: "categorization";
-  categories: Array<{ id: string; text: string }>;
-  items: Array<{ id: string; text: string; categoryId: string }>;
-}
-
-export interface WordBankQuestion extends QuestionBase {
-  type: "wordBank";
-  segments: Array<{ text: string } | { blankId: string }>;
-  blanks: Array<{ id: string; answers: string[] }>;
+export interface WordBankQuizQuestion {
+  id: string;
+  type: "word_bank";
+  order?: number;
+  prompt: string;
+  body: string;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
   distractors?: string[];
 }
 
-export type Question =
-  | MultipleChoiceQuestion
-  | MultipleResponseQuestion
-  | SequenceQuestion
-  | MatchingQuestion
-  | CategorizationQuestion
-  | WordBankQuestion;
+export interface CategorizationQuizQuestion {
+  id: string;
+  type: "categorization";
+  order?: number;
+  prompt: string;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+  categories?: CategorizationCategory[];
+  items?: CategorizationItem[];
+}
 
-export interface Course {
-  schemaVersion: "1.0";
+export type QuizQuestion =
+  | MultipleChoiceQuizQuestion
+  | MultipleResponseQuizQuestion
+  | SequenceQuizQuestion
+  | MatchingQuizQuestion
+  | WordBankQuizQuestion
+  | CategorizationQuizQuestion;
+
+export interface ResultsPageConfig {
+  show?: boolean;
+  show_grade?: boolean;
+  message_mode?: "completion" | "pass_fail" | "score_based" | string;
+  completion_message?: string;
+  success_message?: string;
+  failure_message?: string;
+  show_result_icon?: boolean;
+  show_review_button?: boolean;
+}
+
+export interface Quiz {
   id: string;
   title: string;
-  description?: string;
   language?: string;
   direction?: Direction;
-  passingScore?: number;
-  intro?: string;
-  results?: {
-    passed?: string;
-    failed?: string;
-  };
-  theme?: Theme;
-  questions: Question[];
+  intro_title?: string;
+  intro_body?: string;
+  success_message?: string;
+  failure_message?: string;
+  passing_score_percent?: number;
+  attempts?: number;
+  shuffle_questions?: boolean;
+  show_feedback?: boolean;
+  results_page?: ResultsPageConfig;
+  assets?: QuizAssets;
+  questions: QuizQuestion[];
 }
+
+export interface QuizzesContainer {
+  quizzes: Quiz[];
+}
+
+export type Course = QuizzesContainer;
 
 export interface ValidationIssue {
   path: string;
@@ -97,15 +181,18 @@ export interface ValidationResult {
   suspendDataEstimate: number;
 }
 
-export interface BuildReport {
+export interface ExportReport {
   ok: boolean;
-  command: "build";
+  command: "export" | "validate" | "build";
   courseId: string;
-  output: string;
-  report: string;
+  output?: string;
+  report?: string;
   sha256?: string;
-  fileCount?: number;
-  suspendDataEstimate: number;
+  questionCount: number;
+  totalPoints: number;
+  suspendDataEstimate?: number;
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
 }
+
+export type BuildReport = ExportReport;

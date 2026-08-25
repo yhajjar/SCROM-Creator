@@ -1,13 +1,13 @@
 import { Ajv2020, type ErrorObject } from "ajv/dist/2020.js";
 import * as formatsModule from "ajv-formats";
 import { courseSchema } from "./schema.js";
-import type { Course, Question, ValidationIssue, ValidationResult } from "./types.js";
+import type { Course, Quiz, QuizQuestion, ValidationIssue, ValidationResult } from "./types.js";
 import { lzwCompressLength } from "./util.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false, useDefaults: true });
 const addFormats = formatsModule.default as unknown as (instance: Ajv2020) => void;
 addFormats(ajv);
-const validateSchema = ajv.compile<Course>(courseSchema);
+const validateSchema = ajv.compile(courseSchema);
 
 function issue(path: string, message: string): ValidationIssue {
   return { path: path || "/", message };
@@ -27,26 +27,44 @@ function duplicates(values: string[]): string[] {
   return [...repeated];
 }
 
-function expectedAnswer(question: Question): unknown {
-  switch (question.type) {
-    case "multipleChoice":
-      return question.choices.find((choice) => choice.correct)?.id ?? "";
-    case "multipleResponse":
-      return question.choices.filter((choice) => choice.correct).map((choice) => choice.id);
-    case "sequence":
-      return question.items.map((item) => item.id);
-    case "matching":
-      return Object.fromEntries(question.pairs.map((pair) => [pair.id, pair.id]));
-    case "categorization":
-      return Object.fromEntries(question.items.map((item) => [item.id, item.categoryId]));
-    case "wordBank":
-      return Object.fromEntries(question.blanks.map((blank) => [blank.id, blank.answers[0]]));
+export function extractPrimaryQuiz(input: unknown): Quiz | null {
+  if (!input || typeof input !== "object") return null;
+  const anyObj = input as Record<string, unknown>;
+  if (Array.isArray(anyObj.quizzes) && anyObj.quizzes.length > 0) {
+    return anyObj.quizzes[0] as Quiz;
   }
+  if (Array.isArray(anyObj.questions)) {
+    return anyObj as unknown as Quiz;
+  }
+  return null;
 }
 
-export function estimateSuspendData(course: Course): number {
-  const answers = Object.fromEntries(course.questions.map((question) => [question.id, expectedAnswer(question)]));
-  const state = { i: course.questions.length - 1, a: answers, s: course.questions.map((question) => question.id), f: false };
+export function estimateSuspendData(quiz: Quiz): number {
+  const answers: Record<string, unknown> = {};
+  for (const q of quiz.questions || []) {
+    if (q.type === "multiple_choice") {
+      const c = q.items.find((i) => i.correct);
+      answers[q.id] = c ? c.order ?? c.text : 1;
+    } else if (q.type === "multiple_response") {
+      answers[q.id] = q.items.filter((i) => i.correct).map((i) => i.order ?? i.text);
+    } else if (q.type === "sequence") {
+      answers[q.id] = q.items.map((i) => i.order ?? i.text);
+    } else if (q.type === "matching") {
+      answers[q.id] = q.items.map((i) => [i.text, i.target]);
+    } else if (q.type === "word_bank") {
+      const blanks = [...q.body.matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1]);
+      answers[q.id] = blanks;
+    } else if (q.type === "categorization") {
+      answers[q.id] = (q.items || []).map((i) => [i.text, i.category]);
+    }
+  }
+
+  const state = {
+    id: quiz.id,
+    q: (quiz.questions || []).map((q) => q.id),
+    a: answers,
+    f: false
+  };
   const json = JSON.stringify(state);
   return Math.min(2 + Buffer.byteLength(json, "utf8") * 2, lzwCompressLength(json));
 }
@@ -55,62 +73,57 @@ export function validateCourse(input: unknown): ValidationResult {
   const validShape = validateSchema(input);
   const errors = schemaIssues(validateSchema.errors);
   const warnings: ValidationIssue[] = [];
-  if (!validShape) return { valid: false, errors, warnings, suspendDataEstimate: 0 };
 
-  const course = input as Course;
-  for (const id of duplicates(course.questions.map((question) => question.id))) {
+  const quiz = extractPrimaryQuiz(input);
+  if (!quiz) {
+    errors.push(issue("/", "Input must be a quiz or quizzes container with a valid questions array"));
+    return { valid: false, errors, warnings, suspendDataEstimate: 0 };
+  }
+
+  // Validate question uniqueness
+  const qIds = (quiz.questions || []).map((q) => q.id).filter(Boolean);
+  for (const id of duplicates(qIds)) {
     errors.push(issue("/questions", `duplicate question id "${id}"`));
   }
 
-  course.questions.forEach((question, questionIndex) => {
-    const basePath = `/questions/${questionIndex}`;
-    const nestedIds: string[] = [];
-    if (question.type === "multipleChoice" || question.type === "multipleResponse") {
-      nestedIds.push(...question.choices.map((choice) => choice.id));
-      const correctCount = question.choices.filter((choice) => choice.correct).length;
-      if (question.type === "multipleChoice" && correctCount !== 1) {
-        errors.push(issue(`${basePath}/choices`, "multipleChoice requires exactly one correct choice"));
+  (quiz.questions || []).forEach((question: QuizQuestion, qIdx: number) => {
+    const basePath = `/questions/${qIdx}`;
+    if (question.type === "multiple_choice") {
+      const correctCount = (question.items || []).filter((i) => i.correct).length;
+      if (correctCount !== 1) {
+        errors.push(issue(`${basePath}/items`, "multiple_choice requires exactly one item marked correct: true"));
       }
-      if (question.type === "multipleResponse" && (correctCount < 1 || correctCount === question.choices.length)) {
-        errors.push(issue(`${basePath}/choices`, "multipleResponse requires at least one correct and one incorrect choice"));
+    } else if (question.type === "multiple_response") {
+      const correctCount = (question.items || []).filter((i) => i.correct).length;
+      if (correctCount < 1) {
+        errors.push(issue(`${basePath}/items`, "multiple_response requires at least one item marked correct: true"));
       }
     } else if (question.type === "sequence") {
-      nestedIds.push(...question.items.map((item) => item.id));
+      if (!question.items || question.items.length < 2) {
+        errors.push(issue(`${basePath}/items`, "sequence requires at least 2 sequence items"));
+      }
     } else if (question.type === "matching") {
-      nestedIds.push(...question.pairs.map((pair) => pair.id));
-    } else if (question.type === "categorization") {
-      nestedIds.push(...question.categories.map((category) => category.id), ...question.items.map((item) => item.id));
-      const categoryIds = new Set(question.categories.map((category) => category.id));
-      question.items.forEach((item, itemIndex) => {
-        if (!categoryIds.has(item.categoryId)) {
-          errors.push(issue(`${basePath}/items/${itemIndex}/categoryId`, `unknown category "${item.categoryId}"`));
-        }
-      });
-    } else if (question.type === "wordBank") {
-      nestedIds.push(...question.blanks.map((blank) => blank.id));
-      const blankIds = new Set(question.blanks.map((blank) => blank.id));
-      const referenced = question.segments
-        .filter((segment): segment is { blankId: string } => "blankId" in segment)
-        .map((segment) => segment.blankId);
-      for (const blankId of referenced) {
-        if (!blankIds.has(blankId)) errors.push(issue(`${basePath}/segments`, `unknown blank "${blankId}"`));
+      if (!question.items || question.items.length < 2) {
+        errors.push(issue(`${basePath}/items`, "matching requires at least 2 matching items"));
+      } else {
+        question.items.forEach((item, itemIdx) => {
+          if (!item.text || !item.target) {
+            errors.push(issue(`${basePath}/items/${itemIdx}`, "matching item requires non-empty 'text' and 'target'"));
+          }
+        });
       }
-      for (const blankId of blankIds) {
-        if (referenced.filter((value) => value === blankId).length !== 1) {
-          errors.push(issue(`${basePath}/segments`, `blank "${blankId}" must be referenced exactly once`));
-        }
+    } else if (question.type === "word_bank") {
+      if (!question.body || !question.body.includes("{{")) {
+        errors.push(issue(`${basePath}/body`, "word_bank body must contain at least one '{{answer}}' blank token"));
       }
-    }
-    for (const id of duplicates(nestedIds)) {
-      errors.push(issue(basePath, `duplicate nested id "${id}"`));
     }
   });
 
-  const suspendDataEstimate = estimateSuspendData(course);
+  const suspendDataEstimate = estimateSuspendData(quiz);
   if (suspendDataEstimate > 4096) {
-    errors.push(issue("/questions", `estimated suspend_data is ${suspendDataEstimate} characters; SCORM 1.2 limit is 4096`));
+    errors.push(issue("/questions", `estimated suspend_data is ${suspendDataEstimate} characters; SCORM limit is 4096`));
   } else if (suspendDataEstimate > 3500) {
-    warnings.push(issue("/questions", `estimated suspend_data is close to the SCORM 1.2 limit (${suspendDataEstimate}/4096)`));
+    warnings.push(issue("/questions", `estimated suspend_data is close to limit (${suspendDataEstimate}/4096)`));
   }
 
   return { valid: errors.length === 0, errors, warnings, suspendDataEstimate };

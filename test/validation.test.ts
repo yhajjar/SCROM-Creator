@@ -2,50 +2,45 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { readJsonFile } from "../src/util.js";
-import { validateCourse } from "../src/validate.js";
-import type { Course } from "../src/types.js";
+import { validateCourse, extractPrimaryQuiz } from "../src/validate.js";
+import type { QuizzesContainer } from "../src/types.js";
 
 const root = process.cwd();
 
-test("example course validates with all six interaction types", async () => {
-  const course = await readJsonFile<Course>(path.join(root, "content", "course.json"));
-  const result = validateCourse(course);
+test("Operational Field Awareness assessment fixture validates successfully", async () => {
+  const container = await readJsonFile<QuizzesContainer>(path.join(root, "fixtures", "field-awareness.json"));
+  const result = validateCourse(container);
   assert.equal(result.valid, true, JSON.stringify(result.errors));
-  assert.deepEqual(
-    course.questions.map((question) => question.type),
-    ["multipleChoice", "sequence", "matching", "multipleResponse", "categorization", "wordBank"]
-  );
+  
+  const quiz = extractPrimaryQuiz(container);
+  assert.ok(quiz);
+  assert.equal(quiz.direction, "rtl");
+  assert.equal(quiz.language, "ar");
+  assert.equal(quiz.passing_score_percent, 80);
+  assert.equal(quiz.questions.length, 6);
   assert.ok(result.suspendDataEstimate > 0 && result.suspendDataEstimate < 4096);
 });
 
-test("Arabic RTL fixture validates", async () => {
-  const course = await readJsonFile<Course>(path.join(root, "fixtures", "arabic-course.json"));
-  const result = validateCourse(course);
+test("validation catches multiple_choice without correct item", async () => {
+  const container = await readJsonFile<QuizzesContainer>(path.join(root, "fixtures", "field-awareness.json"));
+  const broken = structuredClone(container);
+  const quiz = broken.quizzes[0];
+  const q0 = quiz.questions[0];
+  if (q0.type === "multiple_choice") {
+    q0.items.forEach(i => { i.correct = false; });
+  }
+  const result = validateCourse(broken);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some(e => e.message.includes("exactly one item marked correct")));
+});
+
+test("validation handles show_feedback toggle and question-level feedbacks", async () => {
+  const container = await readJsonFile<QuizzesContainer>(path.join(root, "fixtures", "field-awareness.json"));
+  const custom = structuredClone(container);
+  custom.quizzes[0].show_feedback = false;
+  custom.quizzes[0].questions[0].correct_feedback = "Correct.";
+  custom.quizzes[0].questions[0].incorrect_feedback = "Try again.";
+  const result = validateCourse(custom);
   assert.equal(result.valid, true, JSON.stringify(result.errors));
-  assert.equal(course.direction, "rtl");
 });
 
-test("semantic validation rejects unsafe answer definitions", async () => {
-  const course = await readJsonFile<Course>(path.join(root, "content", "course.json"));
-  const broken = structuredClone(course);
-  const question = broken.questions[0];
-  assert.equal(question.type, "multipleChoice");
-  if (question.type !== "multipleChoice") throw new Error("Unexpected fixture");
-  question.choices[0].correct = true;
-  question.choices[1].id = question.choices[0].id;
-  const result = validateCourse(broken);
-  assert.equal(result.valid, false);
-  assert.ok(result.errors.some((entry) => entry.message.includes("exactly one correct")));
-  assert.ok(result.errors.some((entry) => entry.message.includes("duplicate nested id")));
-});
-
-test("schema rejects traversal and unknown question types", async () => {
-  const course = await readJsonFile<Course>(path.join(root, "content", "course.json"));
-  const broken = structuredClone(course) as unknown as Record<string, unknown>;
-  const questions = broken.questions as Array<Record<string, unknown>>;
-  questions[0].image = "../secret.png";
-  questions[1].type = "unsupported";
-  const result = validateCourse(broken);
-  assert.equal(result.valid, false);
-  assert.ok(result.errors.length > 0);
-});

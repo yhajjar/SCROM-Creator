@@ -1,0 +1,223 @@
+{
+  "quizzes": [
+    {
+      "id": "sample-fruit-quiz",
+      "title": "Simple Example Quiz",
+      "language": "en",
+      "direction": "ltr",
+
+      "intro_title": "Try the Example Quiz",
+      "intro_body": "This is a simple example showing how different quiz question types work. Replace the sample questions with your own content.",
+
+      "success_message": "Great job! You completed the example quiz successfully.",
+      "failure_message": "Review your answers and try again.",
+
+      "passing_score_percent": 80,
+      "attempts": 1,
+      "shuffle_questions": false,
+      "show_feedback": true,
+
+      "assets": {
+        "review_button_text": "Review Quiz",
+        "review_button_color": "#F59E0B",
+        "review_button_text_color": "#FFFFFF",
+        "primary_button_color": "#2563EB",
+        "primary_button_text_color": "#FFFFFF",
+        "correct_feedback_color": "#16A34A",
+        "incorrect_feedback_color": "#DC2626"
+      },
+
+      "questions": [
+        {
+          "id": "fruit-color",
+          "type": "multiple_choice",
+          "order": 1,
+          "prompt": "Which fruit is usually yellow?",
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! Bananas are usually yellow.",
+          "incorrect_feedback": "Not quite. Think about the common color of a banana.",
+
+          "items": [
+            {
+              "order": 1,
+              "text": "Apple",
+              "correct": false
+            },
+            {
+              "order": 2,
+              "text": "Banana",
+              "correct": true
+            },
+            {
+              "order": 3,
+              "text": "Blueberry",
+              "correct": false
+            },
+            {
+              "order": 4,
+              "text": "Grape",
+              "correct": false
+            }
+          ]
+        },
+
+        {
+          "id": "daily-sequence",
+          "type": "sequence",
+          "order": 2,
+          "prompt": "Put these parts of the day in the correct order.",
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! Morning comes before afternoon and evening.",
+          "incorrect_feedback": "Think about how a normal day progresses.",
+
+          "items": [
+            {
+              "order": 1,
+              "text": "Morning"
+            },
+            {
+              "order": 2,
+              "text": "Afternoon"
+            },
+            {
+              "order": 3,
+              "text": "Evening"
+            },
+            {
+              "order": 4,
+              "text": "Night"
+            }
+          ]
+        },
+
+        {
+          "id": "animal-match",
+          "type": "matching",
+          "order": 3,
+          "prompt": "Match each animal with its sound.",
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! All animals are matched with the right sounds.",
+          "incorrect_feedback": "Try matching each animal with the sound it normally makes.",
+
+          "items": [
+            {
+              "order": 1,
+              "text": "Dog",
+              "target": "Bark",
+              "target_order": 1
+            },
+            {
+              "order": 2,
+              "text": "Cat",
+              "target": "Meow",
+              "target_order": 2
+            },
+            {
+              "order": 3,
+              "text": "Cow",
+              "target": "Moo",
+              "target_order": 3
+            }
+          ]
+        },
+
+        {
+          "id": "select-fruits",
+          "type": "multiple_response",
+          "order": 4,
+          "prompt": "Which of the following are fruits? Select all that apply.",
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! Apple and orange are fruits.",
+          "incorrect_feedback": "Choose only the items that are fruits.",
+
+          "items": [
+            {
+              "order": 1,
+              "text": "Apple",
+              "correct": true
+            },
+            {
+              "order": 2,
+              "text": "Carrot",
+              "correct": false
+            },
+            {
+              "order": 3,
+              "text": "Orange",
+              "correct": true
+            },
+            {
+              "order": 4,
+              "text": "Potato",
+              "correct": false
+            }
+          ]
+        },
+
+        {
+          "id": "simple-knowledge",
+          "type": "multiple_choice",
+          "order": 5,
+          "prompt": "Which animal can fly?",
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! A bird can fly.",
+          "incorrect_feedback": "Think about which animal normally moves through the air.",
+
+          "items": [
+            {
+              "order": 1,
+              "text": "Bird",
+              "correct": true
+            },
+            {
+              "order": 2,
+              "text": "Dog",
+              "correct": false
+            },
+            {
+              "order": 3,
+              "text": "Fish",
+              "correct": false
+            },
+            {
+              "order": 4,
+              "text": "Horse",
+              "correct": false
+            }
+          ]
+        },
+
+        {
+          "id": "complete-sentence",
+          "type": "word_bank",
+          "order": 6,
+          "prompt": "Choose the correct words to complete the sentence.",
+
+          "body": "An {{apple}} is a fruit, the sky is usually {{blue}}, and grass is usually {{green}}.",
+
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+
+          "correct_feedback": "Correct! All words are in the right places.",
+          "incorrect_feedback": "Try again and choose the words that best complete the sentence."
+        }
+      ]
+    }
+  ]
+}

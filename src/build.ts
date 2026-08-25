@@ -1,84 +1,86 @@
 import { promises as fs } from "node:fs";
-import { existsSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import type { BuildReport, Course } from "./types.js";
-import { processAssets } from "./assets.js";
-import { createManifest } from "./manifest.js";
-import { courseSchema } from "./schema.js";
-import { listFiles, readJsonFile, sha256File } from "./util.js";
-import { validateCourse } from "./validate.js";
-import { createZip } from "./zip.js";
+import crypto from "node:crypto";
+import type { Course, ExportReport, Quiz, QuizzesContainer } from "./types.js";
+import { readJsonFile } from "./util.js";
+import { validateCourse, extractPrimaryQuiz } from "./validate.js";
 
-const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
-const playerDirectory = [
-  path.resolve(moduleDirectory, "..", "player"),
-  path.resolve(moduleDirectory, "..", "..", "player")
-].find((candidate) => existsSync(candidate)) ?? path.resolve(moduleDirectory, "..", "player");
+export function normalizeQuizzesPayload(input: unknown): QuizzesContainer {
+  if (input && typeof input === "object") {
+    const anyObj = input as Record<string, unknown>;
+    if (Array.isArray(anyObj.quizzes)) {
+      return input as QuizzesContainer;
+    }
+    if (Array.isArray(anyObj.questions)) {
+      return { quizzes: [input as unknown as Quiz] };
+    }
+  }
+  return { quizzes: [] };
+}
 
-export async function buildCourse(coursePath: string, outputPath: string): Promise<BuildReport> {
-  const absoluteCoursePath = path.resolve(coursePath);
-  const absoluteOutputPath = path.resolve(outputPath);
-  const reportPath = `${absoluteOutputPath}.report.json`;
-  const course = await readJsonFile<Course>(absoluteCoursePath);
-  const validation = validateCourse(course);
-  const report: BuildReport = {
-    ok: false,
-    command: "build",
-    courseId: course.id ?? "",
-    output: absoluteOutputPath,
-    report: reportPath,
+export async function exportCourse(courseInput: string | Course | Quiz | QuizzesContainer, outputPath?: string): Promise<ExportReport> {
+  let rawData: unknown;
+  let sourcePath: string | undefined;
+
+  if (typeof courseInput === "string") {
+    sourcePath = path.resolve(courseInput);
+    rawData = await readJsonFile<unknown>(sourcePath);
+  } else {
+    rawData = courseInput;
+  }
+
+  const normalized = normalizeQuizzesPayload(rawData);
+  const quiz = extractPrimaryQuiz(normalized) || {
+    id: "unknown",
+    title: "Untitled Assessment",
+    questions: []
+  };
+
+  const validation = validateCourse(normalized);
+  const totalPoints = (quiz.questions || []).reduce((sum, q) => sum + (q.points ?? 1), 0);
+  const questionCount = quiz.questions?.length || 0;
+
+  const report: ExportReport = {
+    ok: validation.valid,
+    command: "export",
+    courseId: quiz.id || "unknown",
+    questionCount,
+    totalPoints,
     suspendDataEstimate: validation.suspendDataEstimate,
     errors: [...validation.errors],
     warnings: [...validation.warnings]
   };
 
   if (!validation.valid) {
-    await writeReport(reportPath, report);
-    return report;
-  }
-
-  const temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "scorm-build-"));
-  try {
-    await fs.cp(playerDirectory, temporaryDirectory, { recursive: true });
-    const processed = await processAssets(course, path.dirname(absoluteCoursePath), temporaryDirectory);
-    report.errors.push(...processed.errors);
-    if (report.errors.length > 0) {
+    if (outputPath) {
+      const reportPath = `${outputPath}.report.json`;
+      report.report = reportPath;
       await writeReport(reportPath, report);
-      return report;
     }
-
-    await fs.mkdir(path.join(temporaryDirectory, "content"), { recursive: true });
-    await fs.writeFile(
-      path.join(temporaryDirectory, "content", "course.json"),
-      `${JSON.stringify(processed.course, null, 2)}\n`,
-      "utf8"
-    );
-    await fs.writeFile(
-      path.join(temporaryDirectory, "content", "course.schema.json"),
-      `${JSON.stringify(courseSchema, null, 2)}\n`,
-      "utf8"
-    );
-    const filesBeforeManifest = await listFiles(temporaryDirectory);
-    const manifest = createManifest(processed.course, filesBeforeManifest);
-    await fs.writeFile(path.join(temporaryDirectory, "imsmanifest.xml"), manifest, "utf8");
-
-    report.fileCount = await createZip(temporaryDirectory, absoluteOutputPath);
-    report.sha256 = await sha256File(absoluteOutputPath);
-    report.ok = true;
-    await writeReport(reportPath, report);
     return report;
-  } catch (error) {
-    report.errors.push({ path: "/", message: (error as Error).message });
-    await writeReport(reportPath, report);
-    return report;
-  } finally {
-    await fs.rm(temporaryDirectory, { recursive: true, force: true });
   }
+
+  const jsonString = `${JSON.stringify(normalized, null, 2)}\n`;
+  const sha256 = crypto.createHash("sha256").update(jsonString, "utf8").digest("hex");
+  report.sha256 = sha256;
+
+  if (outputPath) {
+    const absoluteOutputPath = path.resolve(outputPath);
+    await fs.mkdir(path.dirname(absoluteOutputPath), { recursive: true });
+    await fs.writeFile(absoluteOutputPath, jsonString, "utf8");
+    report.output = absoluteOutputPath;
+
+    const reportPath = `${absoluteOutputPath}.report.json`;
+    report.report = reportPath;
+    await writeReport(reportPath, report);
+  }
+
+  return report;
 }
 
-async function writeReport(reportPath: string, report: BuildReport): Promise<void> {
+export const buildCourse = exportCourse;
+
+async function writeReport(reportPath: string, report: ExportReport): Promise<void> {
   await fs.mkdir(path.dirname(reportPath), { recursive: true });
   await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 }

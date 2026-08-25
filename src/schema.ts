@@ -1,259 +1,243 @@
 export const courseSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://local.invalid/scorm/course.schema.json",
-  title: "Reusable SCORM course",
+  $id: "https://local.invalid/scorm/quiz.schema.json",
+  title: "Interactive Assessment Quizzes Schema",
   type: "object",
-  additionalProperties: false,
-  required: ["schemaVersion", "id", "title", "questions"],
-  properties: {
-    schemaVersion: { const: "1.0" },
-    id: { type: "string", format: "uuid" },
-    title: { type: "string", minLength: 1, maxLength: 200 },
-    description: { type: "string", maxLength: 2000 },
-    language: { type: "string", minLength: 2, maxLength: 35, default: "en" },
-    direction: { enum: ["ltr", "rtl", "auto"], default: "ltr" },
-    passingScore: { type: "number", minimum: 0, maximum: 100, default: 80 },
-    intro: { type: "string", maxLength: 4000 },
-    results: {
+  oneOf: [
+    {
       type: "object",
+      required: ["quizzes"],
       additionalProperties: false,
       properties: {
-        passed: { type: "string", maxLength: 2000 },
-        failed: { type: "string", maxLength: 2000 }
+        quizzes: {
+          type: "array",
+          minItems: 1,
+          items: { $ref: "#/$defs/quiz" }
+        }
       }
     },
-    theme: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        primary: { $ref: "#/$defs/color" },
-        secondary: { $ref: "#/$defs/color" },
-        background: { $ref: "#/$defs/color" },
-        surface: { $ref: "#/$defs/color" },
-        text: { $ref: "#/$defs/color" },
-        fontFamily: { type: "string", minLength: 1, maxLength: 120 },
-        logo: { $ref: "#/$defs/assetPath" }
-      }
-    },
-    questions: {
-      type: "array",
-      minItems: 1,
-      maxItems: 250,
-      items: { $ref: "#/$defs/question" }
+    {
+      $ref: "#/$defs/quiz"
     }
-  },
+  ],
   $defs: {
-    color: { type: "string", pattern: "^#[0-9a-fA-F]{6}$" },
-    id: { type: "string", pattern: "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
-    assetPath: {
-      type: "string",
-      minLength: 1,
-      maxLength: 240,
-      pattern: "^(?![A-Za-z]:)(?![/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$)).+$"
-    },
-    base: {
+    color: { type: "string" },
+    id: { type: "string", minLength: 1, maxLength: 100 },
+    quiz: {
       type: "object",
-      required: ["id", "type", "prompt"],
+      required: ["id", "title", "questions"],
+      additionalProperties: true,
       properties: {
         id: { $ref: "#/$defs/id" },
-        type: { type: "string" },
-        prompt: { type: "string", minLength: 1, maxLength: 8000 },
-        points: { type: "number", exclusiveMinimum: 0, maximum: 1000, default: 1 },
-        image: { $ref: "#/$defs/assetPath" },
-        correctFeedback: { type: "string", maxLength: 4000 },
-        incorrectFeedback: { type: "string", maxLength: 4000 },
-        direction: { enum: ["ltr", "rtl", "auto"] }
+        title: { type: "string", minLength: 1, maxLength: 500 },
+        language: { type: "string", minLength: 2, maxLength: 35 },
+        direction: { enum: ["ltr", "rtl", "auto"] },
+        intro_title: { type: "string", maxLength: 500 },
+        intro_body: { type: "string", maxLength: 5000 },
+        success_message: { type: "string", maxLength: 2000 },
+        failure_message: { type: "string", maxLength: 2000 },
+        passing_score_percent: { type: "number", minimum: 0, maximum: 100 },
+        attempts: { type: "number", minimum: 1, maximum: 100 },
+        shuffle_questions: { type: "boolean" },
+        show_feedback: { type: "boolean" },
+        results_page: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            show: { type: "boolean" },
+            show_grade: { type: "boolean" },
+            message_mode: { type: "string", enum: ["completion", "pass_fail", "score_based"] },
+            completion_message: { type: "string", maxLength: 2000 },
+            success_message: { type: "string", maxLength: 2000 },
+            failure_message: { type: "string", maxLength: 2000 },
+            show_result_icon: { type: "boolean" },
+            show_review_button: { type: "boolean" }
+          }
+        },
+        assets: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            review_button_text: { type: "string" },
+            review_button_color: { type: "string" },
+            review_button_text_color: { type: "string" },
+            primary_button_color: { type: "string" },
+            primary_button_text_color: { type: "string" },
+            correct_feedback_color: { type: "string" },
+            incorrect_feedback_color: { type: "string" }
+          }
+        },
+        questions: {
+          type: "array",
+          minItems: 1,
+          maxItems: 250,
+          items: { $ref: "#/$defs/question" }
+        }
       }
     },
-    choice: {
+    choice_item: {
       type: "object",
-      additionalProperties: false,
-      required: ["id", "text", "correct"],
+      required: ["text"],
+      additionalProperties: true,
       properties: {
-        id: { $ref: "#/$defs/id" },
+        order: { type: "number" },
         text: { type: "string", minLength: 1, maxLength: 4000 },
         correct: { type: "boolean" }
       }
     },
-    item: {
+    sequence_item: {
       type: "object",
-      additionalProperties: false,
-      required: ["id", "text"],
+      required: ["text"],
+      additionalProperties: true,
       properties: {
-        id: { $ref: "#/$defs/id" },
+        order: { type: "number" },
         text: { type: "string", minLength: 1, maxLength: 4000 }
+      }
+    },
+    matching_item: {
+      type: "object",
+      required: ["text", "target"],
+      additionalProperties: true,
+      properties: {
+        order: { type: "number" },
+        text: { type: "string", minLength: 1, maxLength: 4000 },
+        target: { type: "string", minLength: 1, maxLength: 4000 },
+        target_order: { type: "number" }
+      }
+    },
+    categorization_category: {
+      type: "object",
+      required: ["title"],
+      additionalProperties: true,
+      properties: {
+        order: { type: "number" },
+        title: { type: "string", minLength: 1, maxLength: 500 }
+      }
+    },
+    categorization_item: {
+      type: "object",
+      required: ["text", "category"],
+      additionalProperties: true,
+      properties: {
+        order: { type: "number" },
+        text: { type: "string", minLength: 1, maxLength: 4000 },
+        category: { type: "string", minLength: 1, maxLength: 500 }
       }
     },
     question: {
       oneOf: [
         {
           type: "object",
-          additionalProperties: false,
-          required: ["id", "type", "prompt", "choices"],
-          properties: {
-            id: { $ref: "#/$defs/id" },
-            type: { const: "multipleChoice" },
-            prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            choices: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/choice" } }
-          }
-        },
-        {
-          type: "object",
-          additionalProperties: false,
-          required: ["id", "type", "prompt", "choices"],
-          properties: {
-            id: { $ref: "#/$defs/id" },
-            type: { const: "multipleResponse" },
-            prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            choices: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/choice" } }
-          }
-        },
-        {
-          type: "object",
-          additionalProperties: false,
           required: ["id", "type", "prompt", "items"],
+          additionalProperties: true,
+          properties: {
+            id: { $ref: "#/$defs/id" },
+            type: { const: "multiple_choice" },
+            order: { type: "number" },
+            prompt: { type: "string", minLength: 1, maxLength: 8000 },
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            items: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/choice_item" } }
+          }
+        },
+        {
+          type: "object",
+          required: ["id", "type", "prompt", "items"],
+          additionalProperties: true,
+          properties: {
+            id: { $ref: "#/$defs/id" },
+            type: { const: "multiple_response" },
+            order: { type: "number" },
+            prompt: { type: "string", minLength: 1, maxLength: 8000 },
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            items: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/choice_item" } }
+          }
+        },
+        {
+          type: "object",
+          required: ["id", "type", "prompt", "items"],
+          additionalProperties: true,
           properties: {
             id: { $ref: "#/$defs/id" },
             type: { const: "sequence" },
+            order: { type: "number" },
             prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            items: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/item" } }
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            items: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/sequence_item" } }
           }
         },
         {
           type: "object",
-          additionalProperties: false,
-          required: ["id", "type", "prompt", "pairs"],
+          required: ["id", "type", "prompt", "items"],
+          additionalProperties: true,
           properties: {
             id: { $ref: "#/$defs/id" },
             type: { const: "matching" },
+            order: { type: "number" },
             prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            pairs: {
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            items: { type: "array", minItems: 2, maxItems: 30, items: { $ref: "#/$defs/matching_item" } }
+          }
+        },
+        {
+          type: "object",
+          required: ["id", "type", "prompt", "body"],
+          additionalProperties: true,
+          properties: {
+            id: { $ref: "#/$defs/id" },
+            type: { const: "word_bank" },
+            order: { type: "number" },
+            prompt: { type: "string", minLength: 1, maxLength: 8000 },
+            body: { type: "string", minLength: 1, maxLength: 8000 },
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            distractors: {
               type: "array",
-              minItems: 2,
-              maxItems: 30,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                required: ["id", "left", "right"],
-                properties: {
-                  id: { $ref: "#/$defs/id" },
-                  left: { type: "string", minLength: 1, maxLength: 4000 },
-                  right: { type: "string", minLength: 1, maxLength: 4000 }
-                }
-              }
+              items: { type: "string", minLength: 1, maxLength: 500 }
             }
           }
         },
         {
           type: "object",
-          additionalProperties: false,
-          required: ["id", "type", "prompt", "categories", "items"],
+          required: ["id", "type", "prompt"],
+          additionalProperties: true,
           properties: {
             id: { $ref: "#/$defs/id" },
             type: { const: "categorization" },
+            order: { type: "number" },
             prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            categories: { type: "array", minItems: 2, maxItems: 20, items: { $ref: "#/$defs/item" } },
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 },
+            categories: {
+              type: "array",
+              minItems: 2,
+              items: { $ref: "#/$defs/categorization_category" }
+            },
             items: {
               type: "array",
               minItems: 2,
-              maxItems: 50,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                required: ["id", "text", "categoryId"],
-                properties: {
-                  id: { $ref: "#/$defs/id" },
-                  text: { type: "string", minLength: 1, maxLength: 4000 },
-                  categoryId: { $ref: "#/$defs/id" }
-                }
-              }
-            }
-          }
-        },
-        {
-          type: "object",
-          additionalProperties: false,
-          required: ["id", "type", "prompt", "segments", "blanks"],
-          properties: {
-            id: { $ref: "#/$defs/id" },
-            type: { const: "wordBank" },
-            prompt: { type: "string", minLength: 1, maxLength: 8000 },
-            points: { type: "number", exclusiveMinimum: 0, maximum: 1000 },
-            image: { $ref: "#/$defs/assetPath" },
-            correctFeedback: { type: "string", maxLength: 4000 },
-            incorrectFeedback: { type: "string", maxLength: 4000 },
-            direction: { enum: ["ltr", "rtl", "auto"] },
-            segments: {
-              type: "array",
-              minItems: 2,
-              maxItems: 100,
-              items: {
-                oneOf: [
-                  {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["text"],
-                    properties: { text: { type: "string", minLength: 1, maxLength: 4000 } }
-                  },
-                  {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["blankId"],
-                    properties: { blankId: { $ref: "#/$defs/id" } }
-                  }
-                ]
-              }
-            },
-            blanks: {
-              type: "array",
-              minItems: 1,
-              maxItems: 50,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                required: ["id", "answers"],
-                properties: {
-                  id: { $ref: "#/$defs/id" },
-                  answers: {
-                    type: "array",
-                    minItems: 1,
-                    maxItems: 20,
-                    uniqueItems: true,
-                    items: { type: "string", minLength: 1, maxLength: 500 }
-                  }
-                }
-              }
-            },
-            distractors: {
-              type: "array",
-              maxItems: 50,
-              uniqueItems: true,
-              items: { type: "string", minLength: 1, maxLength: 500 }
+              items: { $ref: "#/$defs/categorization_item" }
             }
           }
         }
