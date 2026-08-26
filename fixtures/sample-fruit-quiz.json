@@ -17,6 +17,17 @@
       "shuffle_questions": false,
       "show_feedback": true,
 
+      "results_page": {
+        "show": true,
+        "show_grade": false,
+        "message_mode": "completion",
+        "completion_message": "Thanks for attending the quiz.",
+        "success_message": "Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%).",
+        "failure_message": "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
+        "show_result_icon": false,
+        "show_review_button": true
+      },
+
       "assets": {
         "review_button_text": "Review Quiz",
         "review_button_color": "#F59E0B",
@@ -216,6 +227,19 @@
 
           "correct_feedback": "Correct! All words are in the right places.",
           "incorrect_feedback": "Try again and choose the words that best complete the sentence."
+        },
+
+        {
+          "id": "lemon-taste",
+          "type": "true_false",
+          "order": 7,
+          "prompt": "Lemons are naturally sweet like ripe strawberries.",
+          "correct_answer": false,
+          "points": 10,
+          "attempts": 1,
+          "shuffle": false,
+          "correct_feedback": "Correct! Lemons are sour due to high citric acid content.",
+          "incorrect_feedback": "Incorrect. Lemons have a distinctly sour taste, not sweet."
         }
       ]
     }

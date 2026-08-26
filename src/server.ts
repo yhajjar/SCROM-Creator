@@ -158,6 +158,23 @@ app.get("/api/templates", (_req, res) => {
           { order: 4, text: "Redis & MongoDB", category: "Database Systems" }
         ]
       }
+    },
+    true_false: {
+      type: "true_false",
+      name: "True / False",
+      description: "Binary truth value question with fixed True/False choices and boolean correct_answer",
+      template: {
+        id: "tf_sample",
+        type: "true_false",
+        order: 7,
+        prompt: "HTTPS encrypts data in transit between the browser and the web server.",
+        correct_answer: true,
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "Correct! HTTPS encrypts traffic using TLS/SSL protocols.",
+        incorrect_feedback: "Incorrect. HTTPS provides end-to-end encryption for web communications."
+      }
     }
   };
 

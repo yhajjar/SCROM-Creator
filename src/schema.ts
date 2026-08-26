@@ -46,7 +46,7 @@ export const courseSchema = {
           properties: {
             show: { type: "boolean" },
             show_grade: { type: "boolean" },
-            message_mode: { type: "string", enum: ["completion", "pass_fail", "score_based"] },
+            message_mode: { type: "string", enum: ["completion", "pass_fail", "none", "score_based"] },
             completion_message: { type: "string", maxLength: 2000 },
             success_message: { type: "string", maxLength: 2000 },
             failure_message: { type: "string", maxLength: 2000 },
@@ -239,6 +239,23 @@ export const courseSchema = {
               minItems: 2,
               items: { $ref: "#/$defs/categorization_item" }
             }
+          }
+        },
+        {
+          type: "object",
+          required: ["id", "type", "prompt", "correct_answer"],
+          additionalProperties: true,
+          properties: {
+            id: { $ref: "#/$defs/id" },
+            type: { const: "true_false" },
+            order: { type: "number" },
+            prompt: { type: "string", minLength: 1, maxLength: 8000 },
+            correct_answer: { type: "boolean" },
+            points: { type: "number", minimum: 0, maximum: 1000 },
+            attempts: { type: "number", minimum: 1, maximum: 100 },
+            shuffle: { type: "boolean" },
+            correct_feedback: { type: "string", maxLength: 4000 },
+            incorrect_feedback: { type: "string", maxLength: 4000 }
           }
         }
       ]

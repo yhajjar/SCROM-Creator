@@ -126,24 +126,50 @@ export interface CategorizationQuizQuestion {
   items?: CategorizationItem[];
 }
 
+export interface TrueFalseQuizQuestion {
+  id: string;
+  type: "true_false";
+  order?: number;
+  prompt: string;
+  correct_answer: boolean;
+  points?: number;
+  attempts?: number;
+  shuffle?: boolean;
+  show_feedback?: boolean;
+  correct_feedback?: string;
+  incorrect_feedback?: string;
+}
+
 export type QuizQuestion =
   | MultipleChoiceQuizQuestion
   | MultipleResponseQuizQuestion
   | SequenceQuizQuestion
   | MatchingQuizQuestion
   | WordBankQuizQuestion
-  | CategorizationQuizQuestion;
+  | CategorizationQuizQuestion
+  | TrueFalseQuizQuestion;
 
 export interface ResultsPageConfig {
-  show?: boolean;
-  show_grade?: boolean;
-  message_mode?: "completion" | "pass_fail" | "score_based" | string;
-  completion_message?: string;
-  success_message?: string;
-  failure_message?: string;
-  show_result_icon?: boolean;
-  show_review_button?: boolean;
+  show: boolean;
+  show_grade: boolean;
+  message_mode: "completion" | "pass_fail" | "none" | "score_based";
+  completion_message: string;
+  success_message: string;
+  failure_message: string;
+  show_result_icon: boolean;
+  show_review_button: boolean;
 }
+
+export const DEFAULT_RESULTS_PAGE: ResultsPageConfig = {
+  show: true,
+  show_grade: false,
+  message_mode: "completion",
+  completion_message: "Thanks for attending the quiz.",
+  success_message: "Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%).",
+  failure_message: "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
+  show_result_icon: false,
+  show_review_button: true
+};
 
 export interface Quiz {
   id: string;

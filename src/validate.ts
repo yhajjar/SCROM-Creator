@@ -56,6 +56,8 @@ export function estimateSuspendData(quiz: Quiz): number {
       answers[q.id] = blanks;
     } else if (q.type === "categorization") {
       answers[q.id] = (q.items || []).map((i) => [i.text, i.category]);
+    } else if (q.type === "true_false") {
+      answers[q.id] = q.correct_answer;
     }
   }
 
@@ -116,8 +118,16 @@ export function validateCourse(input: unknown): ValidationResult {
       if (!question.body || !question.body.includes("{{")) {
         errors.push(issue(`${basePath}/body`, "word_bank body must contain at least one '{{answer}}' blank token"));
       }
+    } else if (question.type === "true_false") {
+      if (typeof question.correct_answer !== "boolean") {
+        errors.push(issue(`${basePath}/correct_answer`, "true_false requires boolean correct_answer (true or false)"));
+      }
     }
   });
+
+  if (quiz.results_page && (quiz.results_page as any).message_mode === "score_based") {
+    warnings.push(issue("/results_page/message_mode", "Legacy 'score_based' message_mode detected and converted to 'pass_fail'."));
+  }
 
   const suspendDataEstimate = estimateSuspendData(quiz);
   if (suspendDataEstimate > 4096) {

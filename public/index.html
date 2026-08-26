@@ -174,14 +174,14 @@
                   </button>
                 </div>
 
-                <!-- Primary Results Page Feature Switches -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                <!-- Results Page Main Toggle & Disabled Banner -->
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                     <div class="pr-2">
-                      <label for="edit-results-show" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-display text-indigo-500"></i> Show Results Page
+                      <label for="edit-results-show" class="font-bold text-slate-800 text-xs flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-display text-indigo-500"></i> Show Results Page (results_page.show)
                       </label>
-                      <span class="text-[10px] text-slate-500 block">Display completion/grade screen at quiz end</span>
+                      <span class="text-[10px] text-slate-500 block">Display completion/outcome screen when assessment finishes</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer shrink-0">
                       <input type="checkbox" id="edit-results-show" checked class="sr-only peer">
@@ -189,92 +189,107 @@
                     </label>
                   </div>
 
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
-                    <div class="pr-2">
-                      <label for="edit-results-show-grade" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Show Grade & Score
-                      </label>
-                      <span class="text-[10px] text-slate-500 block">Display score points, percentage and passing status</span>
+                  <div id="results-disabled-explanation" class="hidden p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 text-xs"></i>
+                    <div>
+                      <strong class="font-semibold block">Results Page is currently disabled (<code>results_page.show: false</code>)</strong>
+                      <span>The configuration options below are preserved but inactive until the Results Page is enabled.</span>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" id="edit-results-show-grade" class="sr-only peer">
-                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
-                  </div>
-
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
-                    <div class="pr-2">
-                      <label for="edit-results-show-icon" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-award text-indigo-500"></i> Show Result Icon
-                      </label>
-                      <span class="text-[10px] text-slate-500 block">Display status emblem (trophy / star / alert)</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" id="edit-results-show-icon" class="sr-only peer">
-                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
-                  </div>
-
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
-                    <div class="pr-2">
-                      <label for="edit-results-show-review" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-rotate-left text-indigo-500"></i> Show Review Button
-                      </label>
-                      <span class="text-[10px] text-slate-500 block">Allow learner to inspect questions & answers</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" id="edit-results-show-review" checked class="sr-only peer">
-                      <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
                   </div>
                 </div>
 
-                <!-- Message Mode Selector & Variables Helper -->
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label for="edit-results-mode" class="block font-bold text-slate-700 text-xs mb-1">
-                        <i class="fa-solid fa-sliders text-indigo-500"></i> Message Mode (message_mode)
+                <!-- Child Controls Container (Preserved when disabled) -->
+                <div id="results-child-controls-container" class="space-y-3 transition-opacity">
+                  <!-- Primary Results Page Feature Switches -->
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                      <div class="pr-2">
+                        <label for="edit-results-show-grade" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                          <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Show Grade
+                        </label>
+                        <span class="text-[10px] text-slate-500 block">Score & percentage line</span>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="edit-results-show-grade" class="sr-only peer">
+                        <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
                       </label>
-                      <select id="edit-results-mode" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 font-medium">
-                        <option value="completion">completion — Single completion message</option>
-                        <option value="pass_fail">pass_fail — Adaptive success / failure messages</option>
-                        <option value="score_based">score_based — Dynamic score & points interpolation</option>
-                      </select>
                     </div>
 
-                    <div>
-                      <span class="block font-bold text-slate-700 text-xs mb-1">
-                        <i class="fa-solid fa-code text-indigo-500"></i> Insert Template Variables:
-                      </span>
-                      <div class="flex flex-wrap gap-1">
-                        <button type="button" onclick="insertResultVariable('{{points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Learner total points earned">{{points}}</button>
-                        <button type="button" onclick="insertResultVariable('{{max_points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Total possible points">{{max_points}}</button>
-                        <button type="button" onclick="insertResultVariable('{{percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Score percentage earned">{{percent}}</button>
-                        <button type="button" onclick="insertResultVariable('{{passing_percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Required passing percentage">{{passing_percent}}</button>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                      <div class="pr-2">
+                        <label for="edit-results-show-icon" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                          <i class="fa-solid fa-award text-indigo-500"></i> Show Icon
+                        </label>
+                        <span class="text-[10px] text-slate-500 block">Status emblem</span>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="edit-results-show-icon" class="sr-only peer">
+                        <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                      <div class="pr-2">
+                        <label for="edit-results-show-review" class="font-bold text-slate-700 text-xs flex items-center gap-1.5 cursor-pointer">
+                          <i class="fa-solid fa-rotate-left text-indigo-500"></i> Review Button
+                        </label>
+                        <span class="text-[10px] text-slate-500 block">Inspect questions</span>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="edit-results-show-review" checked class="sr-only peer">
+                        <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Message Mode Selector & Variables Helper -->
+                  <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-start">
+                      <div>
+                        <label for="edit-results-mode" class="block font-bold text-slate-700 text-xs mb-1">
+                          <i class="fa-solid fa-sliders text-indigo-500"></i> Message Mode (message_mode)
+                        </label>
+                        <select id="edit-results-mode" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 font-medium">
+                          <option value="completion">completion — Single completion message</option>
+                          <option value="pass_fail">pass_fail — Adaptive success / failure messages</option>
+                          <option value="none">none — No message (grade, icon & review only)</option>
+                        </select>
+                      </div>
+
+                      <div id="results-vars-helper-container">
+                        <span class="block font-bold text-slate-700 text-xs mb-1">
+                          <i class="fa-solid fa-code text-indigo-500"></i> Insert Variable into Message:
+                        </span>
+                        <div class="flex flex-wrap gap-1">
+                          <button type="button" onclick="insertResultVariable('{{points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Learner total points earned">{{points}}</button>
+                          <button type="button" onclick="insertResultVariable('{{max_points}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Total possible points">{{max_points}}</button>
+                          <button type="button" onclick="insertResultVariable('{{percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Score percentage earned">{{percent}}</button>
+                          <button type="button" onclick="insertResultVariable('{{passing_percent}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Required passing percentage">{{passing_percent}}</button>
+                          <button type="button" onclick="insertResultVariable('{{quiz_title}}')" class="px-1.5 py-0.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded font-mono text-[10px] text-indigo-700 cursor-pointer shadow-2xs" title="Assessment title">{{quiz_title}}</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Dynamic Message Inputs -->
-                  <div id="results-completion-msg-container" class="space-y-1">
-                    <label class="block font-bold text-slate-700 text-xs">Completion Message (completion_message)</label>
-                    <textarea id="edit-results-completion-msg" rows="2" placeholder="Thanks for attending the quiz." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
-                  </div>
-
-                  <div id="results-passfail-msg-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div class="space-y-1">
-                      <label class="block font-bold text-emerald-800 text-xs">
-                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Success Message (Passed)
-                      </label>
-                      <textarea id="edit-results-success-msg" rows="2" placeholder="Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%)." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <!-- Dynamic Message Inputs -->
+                    <div id="results-completion-msg-container" class="space-y-1">
+                      <label for="edit-results-completion-msg" class="block font-bold text-slate-700 text-xs">Completion Message (completion_message)</label>
+                      <textarea id="edit-results-completion-msg" rows="2" placeholder="Thanks for attending the quiz." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
                     </div>
 
-                    <div class="space-y-1">
-                      <label class="block font-bold text-rose-800 text-xs">
-                        <i class="fa-solid fa-circle-xmark text-rose-600"></i> Failure Message (Not Passed)
-                      </label>
-                      <textarea id="edit-results-failure-msg" rows="2" placeholder="You scored {{percent}}%. You need {{passing_percent}}% to pass." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <div id="results-passfail-msg-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div class="space-y-1">
+                        <label for="edit-results-success-msg" class="block font-bold text-emerald-800 text-xs">
+                          <i class="fa-solid fa-circle-check text-emerald-600"></i> Success Message (Passed)
+                        </label>
+                        <textarea id="edit-results-success-msg" rows="2" placeholder="Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%)." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                      </div>
+
+                      <div class="space-y-1">
+                        <label for="edit-results-failure-msg" class="block font-bold text-rose-800 text-xs">
+                          <i class="fa-solid fa-circle-xmark text-rose-600"></i> Failure Message (Not Passed)
+                        </label>
+                        <textarea id="edit-results-failure-msg" rows="2" placeholder="You scored {{percent}}%. You need {{passing_percent}}% to pass." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -352,6 +367,9 @@
               </button>
               <button onclick="addQuestionFromPreset('categorization')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-folder-tree text-indigo-500"></i> Categorization
+              </button>
+              <button onclick="addQuestionFromPreset('true_false')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-indigo-500 hover:text-indigo-600 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-regular fa-circle-check text-indigo-500"></i> True / False
               </button>
             </div>
 
@@ -458,60 +476,108 @@
 
       <textarea id="json-editor" class="w-full h-[540px] bg-slate-900 text-slate-200 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 custom-scrollbar"></textarea>
 
-      <!-- Question Types Reference Grid -->
+      <!-- Architecture & Specifications Reference -->
       <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-          <h3 class="text-sm font-bold text-slate-800">Supported Question Types JSON Specifications</h3>
-          <p class="text-xs text-slate-500">Exact JSON structures and presets matching your target assessment schema.</p>
+        <div class="border-b border-slate-100 pb-3 flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-file-code text-indigo-600"></i> Assessment JSON Specifications & SCORM 1.2 Workflow
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">Understanding the role of Assessment Creator, downstream packaging, and schema contracts.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+            Schema v1.2 Compliant
+          </span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-regular fa-circle-dot"></i> multiple_choice
-            </div>
-            <p class="text-[11px] text-slate-600 mb-2">Single selection. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1 item marked correct: true.</p>
-            <button onclick="copyTypeTemplate('multiple_choice')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-arrows-split-up-and-left text-indigo-600"></i> Scope & System Boundary
+            </h4>
+            <ul class="space-y-1 text-slate-600 text-[11px] list-disc list-inside">
+              <li><strong>Authoring & Validation:</strong> This app creates, edits, validates, and exports standardized assessment JSON payloads.</li>
+              <li><strong>Downstream SCORM 1.2 Workflow:</strong> Exported JSON is designed for automated ingestion into a SCORM 1.2 packager.</li>
+              <li><strong>Standalone Runtime:</strong> The app does <em>not</em> generate SCORM packages directly and does <em>not</em> communicate with LMS APIs.</li>
+            </ul>
           </div>
 
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-regular fa-square-check"></i> multiple_response
-            </div>
-            <p class="text-[11px] text-slate-600 mb-2">Multi-select checkboxes. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1+ correct items.</p>
-            <button onclick="copyTypeTemplate('multiple_response')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+          <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-square-poll-vertical text-indigo-600"></i> Results Page 8-Field Contract
+            </h4>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              Every exported assessment contains a complete <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">results_page</code> object with all 8 properties:
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show</code>,
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_grade</code>,
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">message_mode</code> (<code>completion</code> | <code>pass_fail</code> | <code>none</code>),
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">completion_message</code>,
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">success_message</code>,
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">failure_message</code>,
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_result_icon</code>, and
+              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_review_button</code>.
+            </p>
           </div>
+        </div>
 
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-solid fa-list-ol"></i> sequence
+        <div class="border-t border-slate-100 pt-3">
+          <h4 class="text-xs font-bold text-slate-800 mb-2">Supported Native Question Types (7)</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-regular fa-circle-dot"></i> multiple_choice
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Single selection. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1 item marked correct: true.</p>
+              <button onclick="copyTypeTemplate('multiple_choice')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
             </div>
-            <p class="text-[11px] text-slate-600 mb-2">Order ranking. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text }]</code> in exact chronological order.</p>
-            <button onclick="copyTypeTemplate('sequence')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-          </div>
 
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-solid fa-link"></i> matching
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-regular fa-square-check"></i> multiple_response
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Multi-select checkboxes. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1+ correct items.</p>
+              <button onclick="copyTypeTemplate('multiple_response')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
             </div>
-            <p class="text-[11px] text-slate-600 mb-2">Pair matching. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, target, target_order }]</code>.</p>
-            <button onclick="copyTypeTemplate('matching')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-          </div>
 
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-solid fa-font"></i> word_bank
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-solid fa-list-ol"></i> sequence
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Order ranking. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text }]</code> in exact chronological order.</p>
+              <button onclick="copyTypeTemplate('sequence')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
             </div>
-            <p class="text-[11px] text-slate-600 mb-2">Fill-in-the-blanks using <code class="bg-slate-200 px-1 rounded font-mono">body: "Start with {{term}}..."</code> with optional distractors.</p>
-            <button onclick="copyTypeTemplate('word_bank')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-          </div>
 
-          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-            <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-              <i class="fa-solid fa-folder-tree"></i> categorization
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-solid fa-link"></i> matching
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Pair matching. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, target, target_order }]</code>.</p>
+              <button onclick="copyTypeTemplate('matching')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
             </div>
-            <p class="text-[11px] text-slate-600 mb-2">Grouping. Requires <code class="bg-slate-200 px-1 rounded font-mono">categories: [{ title }]</code> and <code class="bg-slate-200 px-1 rounded font-mono">items: [{ text, category }]</code>.</p>
-            <button onclick="copyTypeTemplate('categorization')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-solid fa-font"></i> word_bank
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Fill-in-the-blanks using <code class="bg-slate-200 px-1 rounded font-mono">body: "Start with {{term}}..."</code> with optional distractors.</p>
+              <button onclick="copyTypeTemplate('word_bank')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-solid fa-folder-tree"></i> categorization
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Grouping. Requires <code class="bg-slate-200 px-1 rounded font-mono">categories: [{ title }]</code> and <code class="bg-slate-200 px-1 rounded font-mono">items: [{ text, category }]</code>.</p>
+              <button onclick="copyTypeTemplate('categorization')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
+              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
+                <i class="fa-regular fa-circle-check"></i> true_false
+              </div>
+              <p class="text-[11px] text-slate-600 mb-2">Binary truth value. Stores <code class="bg-slate-200 px-1 rounded font-mono">correct_answer: true/false</code> without an items array.</p>
+              <button onclick="copyTypeTemplate('true_false')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -588,6 +654,16 @@
           attempts: 1,
           shuffle_questions: false,
           show_feedback: true,
+          results_page: {
+            show: true,
+            show_grade: false,
+            message_mode: "completion",
+            completion_message: "Thanks for attending the quiz.",
+            success_message: "Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%).",
+            failure_message: "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
+            show_result_icon: false,
+            show_review_button: true
+          },
           assets: {
             review_button_text: "Review Quiz",
             review_button_color: "#F59E0B",
@@ -693,6 +769,18 @@
               shuffle: false,
               correct_feedback: "Correct! All words are in the right places.",
               incorrect_feedback: "Try again and choose the words that best complete the sentence."
+            },
+            {
+              id: "lemon-taste",
+              type: "true_false",
+              order: 7,
+              prompt: "Lemons are naturally sweet like ripe strawberries.",
+              correct_answer: false,
+              points: 10,
+              attempts: 1,
+              shuffle: false,
+              correct_feedback: "Correct! Lemons are sour due to high citric acid content.",
+              incorrect_feedback: "Incorrect. Lemons have a distinctly sour taste, not sweet."
             }
           ]
         }
@@ -789,6 +877,17 @@
           { order: 1, text: "ارتداء معدات الحماية", category: "الإجراءات الوقائية" },
           { order: 2, text: "تقديم الإسعاف الأولي", category: "الإجراءات العلاجية" }
         ]
+      },
+      true_false: {
+        id: "tf_question",
+        type: "true_false",
+        prompt: "هل العبارة التالية صحيحة أم خاطئة؟",
+        correct_answer: true,
+        points: 10,
+        attempts: 1,
+        shuffle: false,
+        correct_feedback: "إجابة صحيحة ومتقنة.",
+        incorrect_feedback: "إجابة غير صحيحة. يرجى مراجعة المعايير."
       }
     };
 
@@ -800,25 +899,75 @@
         sequence: 'Sequence',
         matching: 'Matching',
         word_bank: 'Word Bank',
-        categorization: 'Categorization'
+        categorization: 'Categorization',
+        true_false: 'True / False'
       };
       if (typeNames[type]) return typeNames[type];
       return String(type || '').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     }
 
+    // Results Page Defaults and Normalizer
+    const DEFAULT_RESULTS_PAGE = {
+      show: true,
+      show_grade: false,
+      message_mode: "completion",
+      completion_message: "Thanks for attending the quiz.",
+      success_message: "Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%).",
+      failure_message: "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
+      show_result_icon: false,
+      show_review_button: true
+    };
+
+    function normalizeResultsPage(rawRp, quiz) {
+      let mode = rawRp?.message_mode;
+      if (mode === 'score_based') {
+        mode = 'pass_fail';
+      }
+      if (!mode || (mode !== 'completion' && mode !== 'pass_fail' && mode !== 'none')) {
+        mode = quiz?.success_message ? 'pass_fail' : 'completion';
+      }
+
+      const completionMsg = (rawRp && typeof rawRp.completion_message === 'string') 
+        ? rawRp.completion_message 
+        : (quiz?.success_message || DEFAULT_RESULTS_PAGE.completion_message);
+      const successMsg = (rawRp && typeof rawRp.success_message === 'string') 
+        ? rawRp.success_message 
+        : (quiz?.success_message || DEFAULT_RESULTS_PAGE.success_message);
+      const failureMsg = (rawRp && typeof rawRp.failure_message === 'string') 
+        ? rawRp.failure_message 
+        : (quiz?.failure_message || DEFAULT_RESULTS_PAGE.failure_message);
+
+      return {
+        show: rawRp?.show !== false,
+        show_grade: Boolean(rawRp?.show_grade),
+        message_mode: mode,
+        completion_message: completionMsg,
+        success_message: successMsg,
+        failure_message: failureMsg,
+        show_result_icon: Boolean(rawRp?.show_result_icon),
+        show_review_button: rawRp?.show_review_button !== false
+      };
+    }
+
     // Helper: Normalize container to primary quiz
     function getQuizFromContainer(container) {
       if (!container) return null;
+      let q = null;
       if (Array.isArray(container.quizzes) && container.quizzes.length > 0) {
-        return container.quizzes[0];
+        q = container.quizzes[0];
+      } else if (Array.isArray(container.questions)) {
+        q = container;
       }
-      if (Array.isArray(container.questions)) {
-        return container;
+      if (q) {
+        q.results_page = normalizeResultsPage(q.results_page, q);
       }
-      return null;
+      return q;
     }
 
     function buildContainerFromQuiz(quiz) {
+      if (quiz) {
+        quiz.results_page = normalizeResultsPage(quiz.results_page, quiz);
+      }
       return {
         quizzes: [quiz]
       };
@@ -954,8 +1103,10 @@
       const showFbEl = document.getElementById('edit-show-feedback');
       if (showFbEl) showFbEl.checked = quiz.show_feedback !== false;
 
-      // Populate results_page configuration
-      const rp = quiz.results_page || {};
+      // Populate results_page configuration with normalization
+      quiz.results_page = normalizeResultsPage(quiz.results_page, quiz);
+      const rp = quiz.results_page;
+
       const showResultsEl = document.getElementById('edit-results-show');
       if (showResultsEl) showResultsEl.checked = rp.show !== false;
 
@@ -970,18 +1121,20 @@
 
       const modeEl = document.getElementById('edit-results-mode');
       if (modeEl) {
-        modeEl.value = rp.message_mode || (quiz.success_message ? 'pass_fail' : 'completion');
-        updateResultsMessageModeVisibility(modeEl.value);
+        modeEl.value = rp.message_mode || 'completion';
       }
 
       const completionMsgEl = document.getElementById('edit-results-completion-msg');
-      if (completionMsgEl) completionMsgEl.value = rp.completion_message || quiz.success_message || "Thanks for attending the quiz.";
+      if (completionMsgEl) completionMsgEl.value = rp.completion_message || DEFAULT_RESULTS_PAGE.completion_message;
 
       const successMsgEl = document.getElementById('edit-results-success-msg');
-      if (successMsgEl) successMsgEl.value = rp.success_message || quiz.success_message || "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).";
+      if (successMsgEl) successMsgEl.value = rp.success_message || DEFAULT_RESULTS_PAGE.success_message;
 
       const failureMsgEl = document.getElementById('edit-results-failure-msg');
-      if (failureMsgEl) failureMsgEl.value = rp.failure_message || quiz.failure_message || "You scored {{percent}}%. You need {{passing_percent}}% to pass.";
+      if (failureMsgEl) failureMsgEl.value = rp.failure_message || DEFAULT_RESULTS_PAGE.failure_message;
+
+      updateResultsShowState(rp.show !== false);
+      updateResultsMessageModeVisibility(rp.message_mode || 'completion');
 
       const assets = quiz.assets || {};
       const primary = assets.primary_button_color || '#16324F';
@@ -1002,6 +1155,25 @@
       updateSummaryStats();
     }
 
+    function updateResultsShowState(show) {
+      const banner = document.getElementById('results-disabled-explanation');
+      const childContainer = document.getElementById('results-child-controls-container');
+      if (banner) {
+        if (show) {
+          banner.classList.add('hidden');
+        } else {
+          banner.classList.remove('hidden');
+        }
+      }
+      if (childContainer) {
+        if (show) {
+          childContainer.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          childContainer.classList.add('opacity-50', 'pointer-events-none');
+        }
+      }
+    }
+
     function updateResultsMessageModeVisibility(mode) {
       const compContainer = document.getElementById('results-completion-msg-container');
       const passFailContainer = document.getElementById('results-passfail-msg-container');
@@ -1009,9 +1181,12 @@
       if (mode === 'completion') {
         compContainer.classList.remove('hidden');
         passFailContainer.classList.add('hidden');
-      } else {
+      } else if (mode === 'pass_fail' || mode === 'score_based') {
         compContainer.classList.add('hidden');
         passFailContainer.classList.remove('hidden');
+      } else { // mode === 'none'
+        compContainer.classList.add('hidden');
+        passFailContainer.classList.add('hidden');
       }
     }
 
@@ -1023,8 +1198,8 @@
       }
       const input = document.getElementById(targetFieldId);
       if (!input) return;
-      const start = input.selectionStart || input.value.length;
-      const end = input.selectionEnd || input.value.length;
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? input.value.length;
       const val = input.value;
       input.value = val.substring(0, start) + varName + val.substring(end);
       input.focus();
@@ -1043,6 +1218,7 @@
     window.enableResultsPageAndRender = function() {
       const showToggle = document.getElementById('edit-results-show');
       if (showToggle) showToggle.checked = true;
+      updateResultsShowState(true);
       syncFormToQuiz();
       renderLivePreview();
       showToast('Results page enabled', 'success');
@@ -1059,13 +1235,15 @@
       currentQuiz.attempts = Number(document.getElementById('edit-attempts')?.value ?? 1);
       currentQuiz.intro_body = document.getElementById('edit-intro-body')?.value || '';
 
+      const resultsShow = document.getElementById('edit-results-show')?.checked ?? true;
       const resultsMode = document.getElementById('edit-results-mode')?.value || 'completion';
-      const completionMsg = document.getElementById('edit-results-completion-msg')?.value || 'Thanks for attending the quiz.';
-      const successMsg = document.getElementById('edit-results-success-msg')?.value || 'Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).';
-      const failureMsg = document.getElementById('edit-results-failure-msg')?.value || 'You scored {{percent}}%. You need {{passing_percent}}% to pass.';
+      const completionMsg = document.getElementById('edit-results-completion-msg')?.value ?? DEFAULT_RESULTS_PAGE.completion_message;
+      const successMsg = document.getElementById('edit-results-success-msg')?.value ?? DEFAULT_RESULTS_PAGE.success_message;
+      const failureMsg = document.getElementById('edit-results-failure-msg')?.value ?? DEFAULT_RESULTS_PAGE.failure_message;
 
+      // Always populate all 8 fields in currentQuiz.results_page regardless of show state
       currentQuiz.results_page = {
-        show: document.getElementById('edit-results-show')?.checked ?? true,
+        show: resultsShow,
         show_grade: document.getElementById('edit-results-show-grade')?.checked ?? false,
         message_mode: resultsMode,
         completion_message: completionMsg,
@@ -1100,7 +1278,13 @@
       });
     });
 
-    ['edit-results-show', 'edit-results-show-grade', 'edit-results-show-icon', 'edit-results-show-review'].forEach(id => {
+    document.getElementById('edit-results-show')?.addEventListener('change', (e) => {
+      updateResultsShowState(e.target.checked);
+      syncFormToQuiz();
+      renderLivePreview();
+    });
+
+    ['edit-results-show-grade', 'edit-results-show-icon', 'edit-results-show-review'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', () => {
         syncFormToQuiz();
         renderLivePreview();
@@ -1347,6 +1531,41 @@
               </div>
             </div>
           `;
+        } else if (q.type === 'true_false') {
+          const isQuizRtl = (currentQuiz && currentQuiz.direction === 'rtl') || (previewDirection === 'rtl');
+          const trueLabel = isQuizRtl ? 'صح (True)' : 'True';
+          const falseLabel = isQuizRtl ? 'خطأ (False)' : 'False';
+          const isTrueCorrect = q.correct_answer === true;
+          const isFalseCorrect = q.correct_answer === false;
+
+          detailsHtml = `
+            <div class="mt-2 space-y-2 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                  Correct Answer (Fixed True / False Selection)
+                </span>
+                <span class="text-indigo-600 text-xs font-semibold">
+                  ${isTrueCorrect ? 'True is set as correct' : 'False is set as correct'}
+                </span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${isTrueCorrect ? 'border-emerald-500 bg-emerald-50/70 text-emerald-900 font-bold shadow-2xs' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'}">
+                  <input type="radio" name="tf_correct_${idx}" value="true" ${isTrueCorrect ? 'checked' : ''} onchange="updateTrueFalseAnswer(${idx}, true)" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                  <span class="text-xs font-semibold flex-1 flex items-center justify-between">
+                    <span><i class="fa-solid fa-check mr-1 text-emerald-600"></i> ${trueLabel}</span>
+                    ${isTrueCorrect ? '<span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-bold">✓ Correct Answer</span>' : ''}
+                  </span>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${isFalseCorrect ? 'border-emerald-500 bg-emerald-50/70 text-emerald-900 font-bold shadow-2xs' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'}">
+                  <input type="radio" name="tf_correct_${idx}" value="false" ${isFalseCorrect ? 'checked' : ''} onchange="updateTrueFalseAnswer(${idx}, false)" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                  <span class="text-xs font-semibold flex-1 flex items-center justify-between">
+                    <span><i class="fa-solid fa-xmark mr-1 text-rose-600"></i> ${falseLabel}</span>
+                    ${isFalseCorrect ? '<span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-bold">✓ Correct Answer</span>' : ''}
+                  </span>
+                </label>
+              </div>
+            </div>
+          `;
         }
 
         const isFeedbackEnabled = q.show_feedback !== false;
@@ -1392,6 +1611,7 @@
                 <option value="matching" ${q.type === 'matching' ? 'selected' : ''}>Matching</option>
                 <option value="word_bank" ${q.type === 'word_bank' ? 'selected' : ''}>Word Bank</option>
                 <option value="categorization" ${q.type === 'categorization' ? 'selected' : ''}>Categorization</option>
+                <option value="true_false" ${q.type === 'true_false' ? 'selected' : ''}>True / False</option>
               </select>
               <span class="text-xs text-slate-400 font-mono">${q.id}</span>
             </div>
@@ -1515,16 +1735,7 @@
           submitBtn.onclick = () => setPreviewQuestion(0);
         }
 
-        const rp = currentQuiz.results_page || {
-          show: true,
-          show_grade: false,
-          message_mode: "completion",
-          completion_message: "Thanks for attending the quiz.",
-          success_message: "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).",
-          failure_message: "You scored {{percent}}%. You need {{passing_percent}}% to pass.",
-          show_result_icon: false,
-          show_review_button: true
-        };
+        const rp = normalizeResultsPage(currentQuiz.results_page, currentQuiz);
 
         if (rp.show === false) {
           previewStage.innerHTML = `
@@ -1557,7 +1768,8 @@
           points: simEarnedPoints,
           max_points: totalPoints,
           percent: simPercent,
-          passing_percent: passingPercent
+          passing_percent: passingPercent,
+          quiz_title: currentQuiz.title || 'Assessment'
         };
 
         const interpolate = (txt) => {
@@ -1566,24 +1778,34 @@
             .replace(/\{\{points\}\}/g, vars.points)
             .replace(/\{\{max_points\}\}/g, vars.max_points)
             .replace(/\{\{percent\}\}/g, vars.percent)
-            .replace(/\{\{passing_percent\}\}/g, vars.passing_percent);
+            .replace(/\{\{passing_percent\}\}/g, vars.passing_percent)
+            .replace(/\{\{quiz_title\}\}/g, vars.quiz_title);
         };
 
         const mode = rp.message_mode || 'completion';
         let renderedMsg = '';
         if (mode === 'completion') {
-          renderedMsg = interpolate(rp.completion_message || currentQuiz.success_message || "Thanks for attending the quiz.");
-        } else {
+          renderedMsg = interpolate(rp.completion_message || "Thanks for attending the quiz.");
+        } else if (mode === 'pass_fail') {
           if (isPassedSim) {
-            renderedMsg = interpolate(rp.success_message || currentQuiz.success_message || "Well done! You passed the quiz with {{points}} out of {{max_points}} points ({{percent}}%).");
+            renderedMsg = interpolate(rp.success_message || "Well done! You passed with {{points}} out of {{max_points}} points ({{percent}}%).");
           } else {
-            renderedMsg = interpolate(rp.failure_message || currentQuiz.failure_message || "You scored {{percent}}%. You need {{passing_percent}}% to pass.");
+            renderedMsg = interpolate(rp.failure_message || "You scored {{percent}}%. You need {{passing_percent}}% to pass.");
           }
+        }
+
+        let messageBoxHtml = '';
+        if (mode !== 'none' && renderedMsg) {
+          messageBoxHtml = `
+            <div class="p-4 rounded-xl ${isPassedSim || mode === 'completion' ? 'bg-indigo-50/70 border border-indigo-200/80 text-indigo-950' : 'bg-rose-50/70 border border-rose-200/80 text-rose-950'} text-xs sm:text-sm font-medium leading-relaxed shadow-2xs text-center max-w-lg mx-auto">
+              ${renderedMsg}
+            </div>
+          `;
         }
 
         const reviewColor = assets.review_button_color || '#C6922D';
         const reviewText = assets.review_button_text || (isRtl ? 'مراجعة الاختبار' : 'Review Quiz');
-        const showIcon = rp.show_result_icon !== false;
+        const showIcon = Boolean(rp.show_result_icon);
         const showGrade = Boolean(rp.show_grade);
         const showReview = rp.show_review_button !== false;
 
@@ -1614,30 +1836,27 @@
         let statusBadge = '';
         if (mode === 'completion') {
           statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">${isRtl ? 'مكتمل' : 'Completed'}</span>`;
-        } else if (isPassedSim) {
-          titleText = isRtl ? 'تهانينا! لقد اجتزت الاختبار' : 'Congratulations! You Passed';
-          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">${isRtl ? 'ناجح' : 'Passed'}</span>`;
+        } else if (mode === 'pass_fail') {
+          if (isPassedSim) {
+            titleText = isRtl ? 'تهانينا! لقد اجتزت الاختبار' : 'Congratulations! You Passed';
+            statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">${isRtl ? 'ناجح' : 'Passed'}</span>`;
+          } else {
+            titleText = isRtl ? 'لم يتم اجتياز الاختبار' : 'Assessment Not Passed';
+            statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">${isRtl ? 'لم يجتز' : 'Did Not Pass'}</span>`;
+          }
         } else {
-          titleText = isRtl ? 'لم يتم اجتياز الاختبار' : 'Assessment Not Passed';
-          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">${isRtl ? 'لم يجتز' : 'Did Not Pass'}</span>`;
+          statusBadge = `<span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${isRtl ? 'انتهى الاختبار' : 'Finished'}</span>`;
         }
 
         let gradeCardsHtml = '';
         if (showGrade) {
           gradeCardsHtml = `
-            <div class="grid grid-cols-3 gap-2.5 pt-1">
-              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'النقاط' : 'Score'}</span>
-                <span class="text-sm sm:text-base font-extrabold text-slate-900">${vars.points} / ${vars.max_points}</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'النسبة' : 'Percentage'}</span>
-                <span class="text-sm sm:text-base font-extrabold ${isPassedSim ? 'text-emerald-600' : 'text-rose-600'}">${vars.percent}%</span>
-              </div>
-              <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block">${isRtl ? 'درجة النجاح' : 'Passing Score'}</span>
-                <span class="text-sm sm:text-base font-extrabold text-slate-700">${vars.passing_percent}%</span>
-              </div>
+            <div class="inline-flex items-center justify-center gap-4 py-2.5 px-5 rounded-xl bg-white border border-slate-200 text-xs font-semibold shadow-2xs mx-auto">
+              <div class="flex items-center gap-1.5"><span class="text-slate-500">${isRtl ? 'النقاط:' : 'Score:'}</span> <strong class="text-slate-900">${vars.points} / ${vars.max_points}</strong></div>
+              <div class="h-3 w-px bg-slate-200"></div>
+              <div class="flex items-center gap-1.5"><span class="text-slate-500">${isRtl ? 'النسبة:' : 'Percentage:'}</span> <strong class="${isPassedSim ? 'text-emerald-600' : 'text-rose-600'}">${vars.percent}%</strong></div>
+              <div class="h-3 w-px bg-slate-200"></div>
+              <div class="flex items-center gap-1.5"><span class="text-slate-500">${isRtl ? 'درجة النجاح:' : 'Passing:'}</span> <strong class="text-slate-700">${vars.passing_percent}%</strong></div>
             </div>
           `;
         }
@@ -1678,10 +1897,7 @@
                 ${statusBadge}
               </div>
 
-              <div class="p-4 rounded-xl ${isPassedSim || mode === 'completion' ? 'bg-indigo-50/70 border border-indigo-200/80 text-indigo-950' : 'bg-rose-50/70 border border-rose-200/80 text-rose-950'} text-xs sm:text-sm font-medium leading-relaxed shadow-2xs text-center max-w-lg mx-auto">
-                ${renderedMsg}
-              </div>
-
+              ${messageBoxHtml}
               ${gradeCardsHtml}
               ${reviewBtnHtml}
             </div>
@@ -1925,6 +2141,30 @@
             </div>
           </div>
         `;
+      } else if (q.type === 'true_false') {
+        const trueText = isRtl ? 'صح' : 'True';
+        const falseText = isRtl ? 'خطأ' : 'False';
+        const isTrueSelected = previewUserAnswers.tfChoice === true;
+        const isFalseSelected = previewUserAnswers.tfChoice === false;
+
+        bodyHtml = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all shadow-2xs ${isTrueSelected ? 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-400 font-bold' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'}">
+              <input type="radio" name="preview_tf" value="true" ${isTrueSelected ? 'checked' : ''} onchange="selectPreviewTf(true)" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              <span class="text-xs sm:text-sm font-semibold text-slate-800 flex-1 flex items-center gap-2">
+                <i class="fa-solid fa-check text-emerald-600"></i>
+                <span>${trueText}</span>
+              </span>
+            </label>
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all shadow-2xs ${isFalseSelected ? 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-400 font-bold' : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'}">
+              <input type="radio" name="preview_tf" value="false" ${isFalseSelected ? 'checked' : ''} onchange="selectPreviewTf(false)" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              <span class="text-xs sm:text-sm font-semibold text-slate-800 flex-1 flex items-center gap-2">
+                <i class="fa-solid fa-xmark text-rose-600"></i>
+                <span>${falseText}</span>
+              </span>
+            </label>
+          </div>
+        `;
       }
 
       previewStage.innerHTML = `
@@ -1946,6 +2186,9 @@
     }
 
     // Preview Interactive Handlers
+    window.selectPreviewTf = function(val) {
+      previewUserAnswers.tfChoice = val;
+    };
     window.selectPreviewMc = function(index) {
       previewUserAnswers.choice = index;
     };
@@ -2048,6 +2291,9 @@
         const assignedCount = items.filter(it => Boolean(assigns[it.text] && assigns[it.text].trim())).length;
         isAnswered = items.length > 0 && assignedCount === items.length;
         validationMsg = isRtl ? 'يرجى تصنيف جميع العناصر قبل الإرسال.' : 'Please categorize all items before submitting.';
+      } else if (q.type === 'true_false') {
+        isAnswered = typeof previewUserAnswers.tfChoice === 'boolean';
+        validationMsg = isRtl ? 'يرجى تحديد صح أو خطأ قبل الإرسال.' : 'Please select True or False before submitting.';
       } else {
         isAnswered = true;
       }
@@ -2096,6 +2342,8 @@
       } else if (q.type === 'categorization') {
         const assigns = previewUserAnswers.catAssignments || {};
         isCorrect = (q.items || []).every(item => assigns[item.text] === item.category);
+      } else if (q.type === 'true_false') {
+        isCorrect = previewUserAnswers.tfChoice === Boolean(q.correct_answer);
       }
 
       // 3. Render Feedback or Submitted Banner based on show_feedback
@@ -2247,9 +2495,37 @@
       const converted = JSON.parse(JSON.stringify(preset));
       converted.id = oldQ.id || `${newType}_${Date.now().toString().slice(-4)}`;
       converted.prompt = oldQ.prompt || converted.prompt;
-      converted.points = oldQ.points || converted.points;
+      converted.points = oldQ.points ?? converted.points;
       converted.order = qIdx + 1;
+      
+      // Preserve shared configuration
+      if (oldQ.attempts !== undefined) converted.attempts = oldQ.attempts;
+      if (oldQ.show_feedback !== undefined) converted.show_feedback = oldQ.show_feedback;
+      if (oldQ.correct_feedback !== undefined) converted.correct_feedback = oldQ.correct_feedback;
+      if (oldQ.incorrect_feedback !== undefined) converted.incorrect_feedback = oldQ.incorrect_feedback;
+      if (oldQ.shuffle !== undefined) converted.shuffle = oldQ.shuffle;
+
+      if (newType === 'true_false') {
+        delete converted.items;
+        delete converted.body;
+        delete converted.distractors;
+        delete converted.categories;
+        converted.correct_answer = typeof oldQ.correct_answer === 'boolean' ? oldQ.correct_answer : true;
+      } else {
+        delete converted.correct_answer;
+      }
+
       currentQuiz.questions[qIdx] = converted;
+      renderQuestionsList(currentQuiz.questions);
+      previewUserAnswers = {};
+      renderLivePreview();
+    };
+
+    window.updateTrueFalseAnswer = function(qIdx, val) {
+      if (!currentQuiz || !currentQuiz.questions || !currentQuiz.questions[qIdx]) return;
+      currentQuiz.questions[qIdx].correct_answer = Boolean(val);
+      delete currentQuiz.questions[qIdx].items;
+      syncFormToQuiz();
       renderQuestionsList(currentQuiz.questions);
       previewUserAnswers = {};
       renderLivePreview();
