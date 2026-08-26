@@ -165,7 +165,7 @@
                       <i class="fa-solid fa-square-poll-vertical"></i>
                     </div>
                     <div>
-                      <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Results Page Configuration (results_page)</h4>
+                      <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Results Page Configuration</h4>
                       <p class="text-[11px] text-slate-500">Controls outcome screens, score cards, evaluation messages, and review actions.</p>
                     </div>
                   </div>
@@ -179,7 +179,7 @@
                   <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                     <div class="pr-2">
                       <label for="edit-results-show" class="font-bold text-slate-800 text-xs flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-display text-indigo-500"></i> Show Results Page (results_page.show)
+                        <i class="fa-solid fa-display text-indigo-500"></i> Show Results Page
                       </label>
                       <span class="text-[10px] text-slate-500 block">Display completion/outcome screen when assessment finishes</span>
                     </div>
@@ -192,7 +192,7 @@
                   <div id="results-disabled-explanation" class="hidden p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
                     <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 text-xs"></i>
                     <div>
-                      <strong class="font-semibold block">Results Page is currently disabled (<code>results_page.show: false</code>)</strong>
+                      <strong class="font-semibold block">Results Page is currently disabled</strong>
                       <span>The configuration options below are preserved but inactive until the Results Page is enabled.</span>
                     </div>
                   </div>
@@ -247,12 +247,12 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-start">
                       <div>
                         <label for="edit-results-mode" class="block font-bold text-slate-700 text-xs mb-1">
-                          <i class="fa-solid fa-sliders text-indigo-500"></i> Message Mode (message_mode)
+                          <i class="fa-solid fa-sliders text-indigo-500"></i> Message Mode
                         </label>
                         <select id="edit-results-mode" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 font-medium">
-                          <option value="completion">completion — Single completion message</option>
-                          <option value="pass_fail">pass_fail — Adaptive success / failure messages</option>
-                          <option value="none">none — No message (grade, icon & review only)</option>
+                          <option value="completion">Single Completion Message</option>
+                          <option value="pass_fail">Adaptive Pass / Fail Messages</option>
+                          <option value="none">No Message (Grade, Icon & Review Only)</option>
                         </select>
                       </div>
 
@@ -272,7 +272,7 @@
 
                     <!-- Dynamic Message Inputs -->
                     <div id="results-completion-msg-container" class="space-y-1">
-                      <label for="edit-results-completion-msg" class="block font-bold text-slate-700 text-xs">Completion Message (completion_message)</label>
+                      <label for="edit-results-completion-msg" class="block font-bold text-slate-700 text-xs">Completion Message</label>
                       <textarea id="edit-results-completion-msg" rows="2" placeholder="Thanks for attending the quiz." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
                     </div>
 
@@ -297,7 +297,7 @@
 
               <!-- Assets Color Palette -->
               <div class="md:col-span-2 border-t border-slate-100 pt-3">
-                <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2">Theme & UI Button Colors (Assets)</label>
+                <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2">Theme & UI Button Colors</label>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div>
                     <label class="block text-[11px] font-medium text-slate-600 mb-1">Primary Button</label>
@@ -474,114 +474,7 @@
         </div>
       </div>
 
-      <textarea id="json-editor" class="w-full h-[540px] bg-slate-900 text-slate-200 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 custom-scrollbar"></textarea>
-
-      <!-- Architecture & Specifications Reference -->
-      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3 flex items-start justify-between gap-4">
-          <div>
-            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-file-code text-indigo-600"></i> Assessment JSON Specifications & SCORM 1.2 Workflow
-            </h3>
-            <p class="text-xs text-slate-500 mt-0.5">Understanding the role of Assessment Creator, downstream packaging, and schema contracts.</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
-            Schema v1.2 Compliant
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-          <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-arrows-split-up-and-left text-indigo-600"></i> Scope & System Boundary
-            </h4>
-            <ul class="space-y-1 text-slate-600 text-[11px] list-disc list-inside">
-              <li><strong>Authoring & Validation:</strong> This app creates, edits, validates, and exports standardized assessment JSON payloads.</li>
-              <li><strong>Downstream SCORM 1.2 Workflow:</strong> Exported JSON is designed for automated ingestion into a SCORM 1.2 packager.</li>
-              <li><strong>Standalone Runtime:</strong> The app does <em>not</em> generate SCORM packages directly and does <em>not</em> communicate with LMS APIs.</li>
-            </ul>
-          </div>
-
-          <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-square-poll-vertical text-indigo-600"></i> Results Page 8-Field Contract
-            </h4>
-            <p class="text-[11px] text-slate-600 leading-relaxed">
-              Every exported assessment contains a complete <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">results_page</code> object with all 8 properties:
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show</code>,
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_grade</code>,
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">message_mode</code> (<code>completion</code> | <code>pass_fail</code> | <code>none</code>),
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">completion_message</code>,
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">success_message</code>,
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">failure_message</code>,
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_result_icon</code>, and
-              <code class="bg-slate-200 px-1 rounded font-mono text-[10px]">show_review_button</code>.
-            </p>
-          </div>
-        </div>
-
-        <div class="border-t border-slate-100 pt-3">
-          <h4 class="text-xs font-bold text-slate-800 mb-2">Supported Native Question Types (7)</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-regular fa-circle-dot"></i> multiple_choice
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Single selection. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1 item marked correct: true.</p>
-              <button onclick="copyTypeTemplate('multiple_choice')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-regular fa-square-check"></i> multiple_response
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Multi-select checkboxes. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, correct }]</code> with 1+ correct items.</p>
-              <button onclick="copyTypeTemplate('multiple_response')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-solid fa-list-ol"></i> sequence
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Order ranking. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text }]</code> in exact chronological order.</p>
-              <button onclick="copyTypeTemplate('sequence')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-solid fa-link"></i> matching
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Pair matching. Requires <code class="bg-slate-200 px-1 rounded font-mono">items: [{ order, text, target, target_order }]</code>.</p>
-              <button onclick="copyTypeTemplate('matching')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-solid fa-font"></i> word_bank
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Fill-in-the-blanks using <code class="bg-slate-200 px-1 rounded font-mono">body: "Start with {{term}}..."</code> with optional distractors.</p>
-              <button onclick="copyTypeTemplate('word_bank')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-solid fa-folder-tree"></i> categorization
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Grouping. Requires <code class="bg-slate-200 px-1 rounded font-mono">categories: [{ title }]</code> and <code class="bg-slate-200 px-1 rounded font-mono">items: [{ text, category }]</code>.</p>
-              <button onclick="copyTypeTemplate('categorization')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-
-            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:bg-white transition-colors">
-              <div class="flex items-center gap-2 font-bold text-xs text-indigo-700 mb-1">
-                <i class="fa-regular fa-circle-check"></i> true_false
-              </div>
-              <p class="text-[11px] text-slate-600 mb-2">Binary truth value. Stores <code class="bg-slate-200 px-1 rounded font-mono">correct_answer: true/false</code> without an items array.</p>
-              <button onclick="copyTypeTemplate('true_false')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer">Copy JSON Template →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <textarea id="json-editor" class="w-full h-[600px] bg-slate-900 text-slate-200 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 custom-scrollbar"></textarea>
     </div>
 
   </main>
@@ -1613,7 +1506,6 @@
                 <option value="categorization" ${q.type === 'categorization' ? 'selected' : ''}>Categorization</option>
                 <option value="true_false" ${q.type === 'true_false' ? 'selected' : ''}>True / False</option>
               </select>
-              <span class="text-xs text-slate-400 font-mono">${q.id}</span>
             </div>
             <div class="flex items-center gap-2">
               <button class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold cursor-pointer" onclick="setPreviewQuestion(${idx})" title="Preview this question">
@@ -1746,7 +1638,7 @@
               <div class="space-y-1">
                 <h3 class="text-sm sm:text-base font-bold text-amber-950">${isRtl ? 'صفحة النتائج معطلة' : 'Results Page Disabled'}</h3>
                 <p class="text-xs text-amber-800 max-w-sm mx-auto">
-                  <code>results_page.show: false</code> is set. Learners will finish the assessment immediately without viewing a results screen.
+                  ${isRtl ? 'تم تعطيل صفحة النتائج. سينهي المتعلم الاختبار مباشرة بعد الإجابة.' : 'The results page is disabled. Learners will finish the assessment immediately without viewing a results screen.'}
                 </p>
               </div>
               <button onclick="enableResultsPageAndRender()" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs cursor-pointer shadow-2xs transition-all">
