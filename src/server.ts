@@ -12,9 +12,11 @@ const projectRoot = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup output storage directory
+// Setup output and content storage directories
 const outputDir = path.join(projectRoot, "output");
+const contentDir = path.join(projectRoot, "content");
 await fs.mkdir(outputDir, { recursive: true });
+await fs.mkdir(contentDir, { recursive: true });
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
@@ -321,7 +323,9 @@ app.post("/api/courses", async (req, res) => {
     const quizId = quiz.id;
     const safeId = quizId.replace(/[^a-zA-Z0-9_-]/g, "_");
     const filename = `custom-${safeId}.json`;
-    const targetPath = path.join(projectRoot, "content", filename);
+    const contentDir = path.join(projectRoot, "content");
+    await fs.mkdir(contentDir, { recursive: true });
+    const targetPath = path.join(contentDir, filename);
 
     await fs.writeFile(targetPath, JSON.stringify(container, null, 2), "utf8");
 

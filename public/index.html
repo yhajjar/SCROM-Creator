@@ -1152,8 +1152,16 @@
       currentQuiz.shuffle_questions = Boolean(document.getElementById('edit-shuffle-questions')?.checked);
       currentQuiz.show_feedback = document.getElementById('edit-show-feedback')?.checked ?? true;
 
+      const isRtlDirection = currentQuiz.direction === 'rtl';
+      const existingReviewText = currentQuiz.assets?.review_button_text;
+      let defaultReviewText = isRtlDirection ? "مراجعة الاختبار" : "Review Quiz";
+      // If the review text is in the opposite language's default, adapt it
+      if (existingReviewText && existingReviewText !== "مراجعة الاختبار" && existingReviewText !== "Review Quiz") {
+        defaultReviewText = existingReviewText;
+      }
+
       currentQuiz.assets = {
-        review_button_text: "مراجعة الاختبار",
+        review_button_text: defaultReviewText,
         review_button_color: document.getElementById('asset-review-color')?.value || '#C6922D',
         review_button_text_color: "#FFFFFF",
         primary_button_color: document.getElementById('asset-primary-color')?.value || '#16324F',
@@ -1696,7 +1704,10 @@
         }
 
         const reviewColor = assets.review_button_color || '#C6922D';
-        const reviewText = assets.review_button_text || (isRtl ? 'مراجعة الاختبار' : 'Review Quiz');
+        let reviewText = assets.review_button_text;
+        if (!reviewText || (isRtl && reviewText === 'Review Quiz') || (!isRtl && reviewText === 'مراجعة الاختبار')) {
+          reviewText = isRtl ? 'مراجعة الاختبار' : 'Review Quiz';
+        }
         const showIcon = Boolean(rp.show_result_icon);
         const showGrade = Boolean(rp.show_grade);
         const showReview = rp.show_review_button !== false;
