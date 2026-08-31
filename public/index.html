@@ -7,13 +7,99 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cairo:wght@400;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .rtl-text { font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif; direction: rtl; }
-    .tab-active { @apply border-indigo-600 text-indigo-600 bg-indigo-50/50 font-semibold; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ui-navy: #0f172a;
+      --ui-blue: #0369a1;
+      --ui-blue-dark: #075985;
+      --ui-blue-soft: #e0f2fe;
+      --ui-canvas: #f8fafc;
+      --ui-surface: #ffffff;
+      --ui-border: #dbe4ee;
+      --ui-muted: #64748b;
+      --ui-text: #172033;
+      --ui-danger: #b91c1c;
+      --ui-radius: 14px;
+      --ui-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+      --ui-ring: 0 0 0 3px rgba(3, 105, 161, .24);
+      --ui-motion: 180ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    html { background: var(--ui-canvas); scroll-behavior: smooth; }
+    body { font-family: 'Work Sans', sans-serif; color: var(--ui-text); background: var(--ui-canvas); }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', 'Work Sans', sans-serif; letter-spacing: -.015em; }
+    .rtl-text { font-family: 'Cairo', 'Work Sans', sans-serif; direction: rtl; }
+
+    button, input, select, textarea { transition: border-color var(--ui-motion), background-color var(--ui-motion), box-shadow var(--ui-motion), color var(--ui-motion), transform var(--ui-motion); }
+    button { min-height: 2.5rem; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--ui-blue); outline-offset: 2px; box-shadow: var(--ui-ring); }
+    input, select, textarea { border-color: var(--ui-border) !important; box-shadow: inset 0 1px 1px rgba(15, 23, 42, .025); }
+    input:hover, select:hover, textarea:hover { border-color: #94a3b8 !important; }
+    input:focus, select:focus, textarea:focus { border-color: var(--ui-blue) !important; box-shadow: var(--ui-ring) !important; outline: none; }
+
+    header { background: rgba(255, 255, 255, .94) !important; border-color: var(--ui-border) !important; box-shadow: 0 1px 0 rgba(15, 23, 42, .04), 0 8px 22px rgba(15, 23, 42, .035); backdrop-filter: blur(14px); }
+    header > div { max-width: 80rem !important; }
+    header h1 { color: var(--ui-navy) !important; }
+    header nav { gap: .25rem !important; overflow-x: auto; scrollbar-width: none; }
+    header nav::-webkit-scrollbar { display: none; }
+    header .tab-btn { min-height: 3rem; padding-inline: .875rem !important; border-radius: .625rem .625rem 0 0; white-space: nowrap; }
+    header .tab-btn:hover { background: #f1f5f9; }
+    .tab-active, header .border-indigo-600 { border-color: var(--ui-blue) !important; color: var(--ui-blue) !important; background: var(--ui-blue-soft) !important; }
+
+    main { max-width: 80rem !important; }
+    main > .tab-content > .bg-white, main .lg\\:col-span-7 > .bg-white, main .lg\\:col-span-5 > .bg-white { border-color: var(--ui-border) !important; border-radius: var(--ui-radius) !important; box-shadow: var(--ui-shadow); }
+    main .bg-white.rounded-xl { border-color: var(--ui-border) !important; border-radius: var(--ui-radius) !important; box-shadow: var(--ui-shadow); }
+    main .border-slate-100, main .border-slate-200, main .border-slate-300 { border-color: var(--ui-border) !important; }
+    main .bg-slate-50 { background-color: #f8fafc !important; }
+    main .bg-slate-100 { background-color: #f1f5f9 !important; }
+    main .text-slate-800 { color: var(--ui-text) !important; }
+    main .text-slate-700 { color: #334155 !important; }
+    main .text-slate-600, main .text-slate-500 { color: var(--ui-muted) !important; }
+
+    body .bg-indigo-600 { background-color: var(--ui-blue) !important; }
+    body .hover\\:bg-indigo-700:hover { background-color: var(--ui-blue-dark) !important; }
+    body .text-indigo-600, body .text-indigo-700, body .text-indigo-500 { color: var(--ui-blue) !important; }
+    body .bg-indigo-50, body .bg-indigo-50\\/50 { background-color: var(--ui-blue-soft) !important; }
+    body .border-indigo-200 { border-color: #bae6fd !important; }
+    body .text-rose-700 { color: var(--ui-danger) !important; }
+    body .bg-rose-50 { background-color: #fff1f2 !important; }
+    body .border-rose-200 { border-color: #fecdd3 !important; }
+
+    button:not(:disabled):hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    #btn-delete-course:hover { background: #ffe4e6 !important; border-color: #fda4af !important; }
+    #btn-save-course, #btn-new-course { border-color: #cbd5e1 !important; background: #fff !important; }
+    #btn-save-course:hover, #btn-new-course:hover { color: var(--ui-blue) !important; border-color: #7dd3fc !important; background: #f0f9ff !important; }
+
+    .lg\\:col-span-5.sticky { top: 6.75rem; }
+    #preview-stage { background: linear-gradient(145deg, #f8fafc 0%, #eef6fb 100%) !important; }
+    #preview-stage > * { animation: ui-fade-in var(--ui-motion) both; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #b8c8d8; border-radius: 999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    @keyframes ui-fade-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1023px) { .lg\\:col-span-5.sticky { position: static; } }
+    @media (max-width: 767px) {
+      main { padding: 1rem !important; }
+      header > div { padding-inline: 1rem !important; }
+      header .h-16 { height: auto !important; min-height: 4.5rem; padding-block: .65rem; }
+      header h1 + p { display: none; }
+      header .tab-btn { font-size: .75rem; }
+      #btn-download-json-header { padding-inline: .75rem !important; }
+      #btn-download-json-header span { display: none; }
+      main .md\\:flex-row > div, main .md\\:flex-row > .flex { width: 100%; }
+      main .md\\:flex-row > .flex.items-center { flex-wrap: wrap; }
+      main .md\\:flex-row select { min-width: 0; }
+      main .grid { gap: 1rem !important; }
+      main .p-5 { padding: 1rem !important; }
+      #preview-stage { min-height: 20rem !important; padding: 1rem !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body class="h-full flex flex-col text-slate-800 bg-slate-50">
@@ -392,11 +478,11 @@
                 <span class="text-xs font-bold uppercase tracking-wider">Interactive Live Preview</span>
               </div>
               <div class="flex items-center gap-2">
-                <button id="btn-prev-preview-q" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
+                <button id="btn-prev-preview-q" aria-label="Previous preview question" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
                   <i class="fa-solid fa-chevron-left"></i>
                 </button>
                 <span id="preview-q-index-badge" class="text-xs font-mono text-indigo-300">1 / 1</span>
-                <button id="btn-next-preview-q" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
+                <button id="btn-next-preview-q" aria-label="Next preview question" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-semibold cursor-pointer">
                   <i class="fa-solid fa-chevron-right"></i>
                 </button>
               </div>
