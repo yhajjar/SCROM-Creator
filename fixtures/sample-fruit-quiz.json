@@ -30,12 +30,12 @@
 
       "assets": {
         "review_button_text": "Review Quiz",
-        "review_button_color": "#F59E0B",
-        "review_button_text_color": "#FFFFFF",
-        "primary_button_color": "#2563EB",
+        "review_button_color": "#30C5CA",
+        "review_button_text_color": "#003748",
+        "primary_button_color": "#003748",
         "primary_button_text_color": "#FFFFFF",
-        "correct_feedback_color": "#16A34A",
-        "incorrect_feedback_color": "#DC2626"
+        "correct_feedback_color": "#30C5CA",
+        "incorrect_feedback_color": "#003748"
       },
 
       "questions": [
