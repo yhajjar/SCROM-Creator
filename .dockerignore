@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules
+dist
+content
+output
+*.zip
+*.report.json
+npm-debug.log*
