@@ -72,7 +72,7 @@
     #btn-save-course, #btn-new-course { border-color: #cbd5e1 !important; background: #fff !important; }
     #btn-save-course:hover, #btn-new-course:hover { color: var(--ui-blue) !important; border-color: #7dd3fc !important; background: #f0f9ff !important; }
 
-    .lg\\:col-span-5.sticky { top: 6.75rem; }
+    [class~="lg:col-span-5"].sticky { top: 6.75rem; }
     #preview-stage { background: linear-gradient(145deg, #f8fafc 0%, #eef6fb 100%) !important; }
     #preview-stage > * { animation: ui-fade-in var(--ui-motion) both; }
     .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -81,7 +81,7 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     @keyframes ui-fade-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
-    @media (max-width: 1023px) { .lg\\:col-span-5.sticky { position: static; } }
+    @media (max-width: 1023px) { [class~="lg:col-span-5"].sticky { position: static; } }
     @media (max-width: 767px) {
       main { padding: 1rem !important; }
       header > div { padding-inline: 1rem !important; }
